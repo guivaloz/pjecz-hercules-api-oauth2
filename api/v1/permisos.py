@@ -1,5 +1,5 @@
 """
-Permisos v1
+Permisos, API v1
 """
 
 from typing import Annotated

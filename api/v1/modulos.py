@@ -1,5 +1,5 @@
 """
-Modulos v1
+Modulos, API v1
 """
 
 from typing import Annotated

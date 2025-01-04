@@ -8,9 +8,14 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_pagination import add_pagination
 
+from api.v1.autoridades import autoridades
+from api.v1.distritos import distritos
+from api.v1.materias import materias
+from api.v1.materias_tipos_juicios import materias_tipos_juicios
 from api.v1.modulos import modulos
 from api.v1.permisos import permisos
 from api.v1.roles import roles
+from api.v1.sentencias import sentencias
 from api.v1.usuarios import usuarios
 from api.v1.usuarios_roles import usuarios_roles
 from config.settings import Settings, get_settings
@@ -32,9 +37,14 @@ def create_app() -> FastAPI:
     )
 
     # Rutas
+    app.include_router(autoridades)
+    app.include_router(distritos)
+    app.include_router(materias)
+    app.include_router(materias_tipos_juicios)
     app.include_router(modulos)
     app.include_router(permisos)
     app.include_router(roles)
+    app.include_router(sentencias)
     app.include_router(usuarios)
     app.include_router(usuarios_roles)
 

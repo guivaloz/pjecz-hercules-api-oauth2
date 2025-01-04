@@ -5,7 +5,7 @@ Usuarios, modelos
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from lib.database import Base
@@ -21,6 +21,10 @@ class Usuario(Base, UniversalMixin):
 
     # Clave primaria
     id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Claves foráneas
+    autoridad_id: Mapped[int] = mapped_column(ForeignKey("autoridades.id"))
+    autoridad: Mapped["Autoridad"] = relationship(back_populates="usuarios")
 
     # Columnas
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True)
