@@ -24,14 +24,10 @@ class Usuario(Base, UniversalMixin):
 
     # Columnas
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True)
-    email_personal: Mapped[str] = mapped_column(String(256))
     nombres: Mapped[str] = mapped_column(String(256))
     apellido_paterno: Mapped[str] = mapped_column(String(256))
     apellido_materno: Mapped[str] = mapped_column(String(256))
-    curp: Mapped[str] = mapped_column(String(18))
     puesto: Mapped[str] = mapped_column(String(256))
-    api_key: Mapped[Optional[str]] = mapped_column(String(128))
-    api_key_expiracion: Mapped[Optional[datetime]]
     contrasena: Mapped[Optional[str]] = mapped_column(String(256))
 
     # Hijos

@@ -2,11 +2,17 @@
 Usuarios, esquemas de pydantic
 """
 
-from datetime import datetime
-
 from pydantic import BaseModel, ConfigDict
 
 from lib.schemas_base import OneBaseOut
+
+
+class Token(BaseModel):
+    """Token"""
+
+    access_token: str
+    token_type: str
+    username: str
 
 
 class UsuarioOut(BaseModel):
@@ -32,5 +38,3 @@ class UsuarioInDB(UsuarioOut):
     permissions: dict
     hashed_password: str
     disabled: bool
-    api_key: str
-    api_key_expiracion: datetime

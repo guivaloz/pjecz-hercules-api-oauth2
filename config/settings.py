@@ -16,6 +16,7 @@ con las siguientes variables:
 - DB_USER
 - ORIGINS
 - SALT
+- SECRET_KEY
 
 Para producción vaya a Google Secret Manager en
 https://console.cloud.google.com/security/secret-manager
@@ -28,6 +29,7 @@ y cree como secretos las siguientes variables de entorno
 - pjecz_hercules_api_oauth2_db_user
 - pjecz_hercules_api_oauth2_origins
 - pjecz_hercules_api_oauth2_salt
+- pjecz_hercules_api_oauth2_secret_key
 
 Y en el archivo app.yaml agregue las siguientes variables de entorno
 
@@ -76,7 +78,7 @@ class Settings(BaseSettings):
     db_user: str = get_secret("db_user")
     origins: str = get_secret("origins")
     salt: str = get_secret("salt")
-    tz: str = "America/Mexico_City"
+    secret_key: str = get_secret("secret_key")
 
     class Config:
         """Load configuration"""

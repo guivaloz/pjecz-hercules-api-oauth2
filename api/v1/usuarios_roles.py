@@ -4,11 +4,14 @@ Usuarios-Roles v1
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from lib.authentications import get_current_active_user
 from lib.database import Session, get_db
 from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError
+from models.permiso import Permiso
 from models.usuario_rol import UsuarioRol
+from schemas.usuario import UsuarioInDB
 from schemas.usuario_rol import OneUsuarioRolOut
 
 usuarios_roles = APIRouter(prefix="/api/v1/usuarios_roles", tags=["sistema"])
@@ -26,10 +29,13 @@ def get_usuario_rol(database: Session, usuario_rol_id: int) -> UsuarioRol:
 
 @usuarios_roles.get("/{usuario_rol_id}", response_model=OneUsuarioRolOut)
 async def detalle_usuario_rol(
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     usuario_rol_id: int,
 ):
     """Detalle de un usuario-rol a partir de su ID"""
+    if current_user.permissions.get("USUARIOS ROLES", 0) < Permiso.VER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
         usuario_rol = get_usuario_rol(database, usuario_rol_id)
     except MyAnyError as error:
