@@ -16,10 +16,13 @@ from lib.database import Session, get_db
 from lib.exceptions import MyAnyError, MyAuthenticationError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from lib.safe_string import safe_email
 from models.usuario import Usuario
-from schemas.usuario import UsuarioInDB
+from schemas.usuario import Token, UsuarioInDB
 
+ALGORITHM = "HS256"
 PASSWORD_REGEXP = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,24}$"
+TOKEN_EXPIRES_SECONDS = 3600  # 1 hora
 
+# Autentificar con OAuth2 y solicitar token en @app.post("/token", response_model=Token)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -59,10 +62,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def authenticate_user(email: str, password: str, database: Session = Depends(get_db)) -> UsuarioInDB:
+def authenticate_user(username: str, password: str, database: Session = Depends(get_db)) -> UsuarioInDB:
     """Autentificar al usuario"""
     try:
-        usuario = get_usuario_with_email(database, email)
+        usuario = get_usuario_with_email(database, username)
     except MyAnyError as error:
         raise error
     if not verify_password(password, usuario.hashed_password):
@@ -70,54 +73,45 @@ def authenticate_user(email: str, password: str, database: Session = Depends(get
     return usuario
 
 
-async def create_access_token(
-    settings: Annotated[Settings, Depends(get_settings)],
-    data: dict,
-    expires_delta: timedelta,
-):
-    """Crear un token"""
+def encode_token(settings: Settings, usuario: UsuarioInDB) -> str:
+    """Crear el token"""
+    expiration_timestamp = datetime.now(timezone.utc) + timedelta(seconds=TOKEN_EXPIRES_SECONDS)
     payload = {
-        "username": data["username"],
-        "exp": datetime.now(timezone.utc) + expires_delta,
+        "username": usuario.email,
+        "expires_at": expiration_timestamp.timestamp(),
     }
-    return jwt.encode(
-        payload=payload,
-        key=settings.secret_key,
-        algorithm="HS256",
-    )
+    return jwt.encode(payload=payload, key=settings.secret_key, algorithm=ALGORITHM)
+
+
+def decode_token(token: str, settings: Settings) -> dict:
+    """Decodificar el token"""
+    try:
+        payload = jwt.decode(jwt=token, key=settings.secret_key, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError as error:
+        raise MyAuthenticationError("No es válido el token") from error
+    return payload
 
 
 async def get_current_user(
     database: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
-    token: str,
+    token: Annotated[str, Depends(oauth2_scheme)],
 ) -> UsuarioInDB:
     """Obtener el usuario a partir del token"""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(
-            jwt=token,
-            key=settings.secret_key,
-            algorithms=["HS256"],
-        )
-    except jwt.ExpiredSignatureError as error:
-        raise credentials_exception
-    username: str = payload.get("username")
-    usuario = get_usuario_with_email(database, username)
-    return usuario
-
-
-async def get_current_active_user(
-    current_user: UsuarioInDB = Depends(get_current_user),
-) -> UsuarioInDB:
-    """Obtener el usuario activo"""
-    if current_user.disabled:
+        decoded_token = decode_token(token, settings)
+    except MyAnyError as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No está autorizado porque su cuenta está deshabilitada",
-        )
-    return current_user
+            detail=str(error),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from error
+    try:
+        usuario = get_usuario_with_email(database, decoded_token.get("username"))
+    except MyAnyError as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(error),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from error
+    return usuario

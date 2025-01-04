@@ -11,6 +11,7 @@ class Token(BaseModel):
     """Token"""
 
     access_token: str
+    expires_in: int
     token_type: str
     username: str
 

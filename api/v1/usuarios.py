@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from lib.authentications import get_current_active_user
+from lib.authentications import get_current_user
 from lib.database import Session, get_db
 from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError
 from models.permiso import Permiso
@@ -28,7 +28,7 @@ def get_usuario(database: Session, usuario_id: int) -> Usuario:
 
 @usuarios.get("/{usuario_id}", response_model=OneUsuarioOut)
 async def detalle_usuario(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
     database: Annotated[Session, Depends(get_db)],
     usuario_id: int,
 ):

@@ -1,7 +1,7 @@
 """
 PJECZ Hércules API OAuth2
 """
-from datetime import timedelta
+
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -12,7 +12,8 @@ from api.v1.permisos import permisos
 from api.v1.roles import roles
 from api.v1.usuarios import usuarios
 from api.v1.usuarios_roles import usuarios_roles
-from lib.authentications import authenticate_user, create_access_token
+from config.settings import Settings, get_settings
+from lib.authentications import TOKEN_EXPIRES_SECONDS, authenticate_user, encode_token
 from lib.database import Session, get_db
 from lib.exceptions import MyAnyError
 from schemas.usuario import Token
@@ -24,7 +25,7 @@ def create_app() -> FastAPI:
     # FastAPI
     app = FastAPI(
         title="PJECZ Hércules API Oauth2",
-        description="API para trabajar con Plataforma Web con autentificación OAuth2",
+        description="API para trabajar con la base de datos Plataforma Web con autentificación OAuth2",
         docs_url="/docs",
         redoc_url=None,
     )
@@ -36,35 +37,32 @@ def create_app() -> FastAPI:
     app.include_router(usuarios)
     app.include_router(usuarios_roles)
 
-    @app.get("/", include_in_schema=False)
+    @app.get("/")
     async def root():
         """Mensaje de bienvenida"""
-        return {"message": "Bienvenido a PJECZ Hércules API Oauth2"}
+        return {"message": "API para trabajar con la base de datos Plataforma Web con autentificación OAuth2"}
 
     @app.post("/token", response_model=Token)
-    async def obtener_token(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    async def login(
         database: Annotated[Session, Depends(get_db)],
-    ):
-        """Entregar el token"""
+        settings: Annotated[Settings, Depends(get_settings)],
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    ) -> Token:
+        """Login para enviar el formulario OAuth2PasswordRequestForm y entregar el token"""
         try:
-            usuario = authenticate_user(email=form_data.username, password=form_data.password, database=database)
+            usuario = authenticate_user(username=form_data.username, password=form_data.password, database=database)
         except MyAnyError as error:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=str(error),
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        access_token = create_access_token(
-            data={"sub": usuario.email},
-            expires_delta=timedelta(minutes=60),
+        return Token(
+            access_token=encode_token(settings=settings, usuario=usuario),
+            expires_in=TOKEN_EXPIRES_SECONDS,
+            token_type="bearer",
+            username=usuario.email,
         )
-        datos = {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "username": usuario.username,
-        }
-        return Token(**datos)
 
     # Entregar
     return app
