@@ -6,6 +6,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_pagination import add_pagination
 
 from api.v1.modulos import modulos
 from api.v1.permisos import permisos
@@ -30,12 +31,15 @@ def create_app() -> FastAPI:
         redoc_url=None,
     )
 
-    # End-points
+    # Rutas
     app.include_router(modulos)
     app.include_router(permisos)
     app.include_router(roles)
     app.include_router(usuarios)
     app.include_router(usuarios_roles)
+
+    # Paginación
+    add_pagination(app)
 
     @app.get("/")
     async def root():
@@ -48,7 +52,7 @@ def create_app() -> FastAPI:
         settings: Annotated[Settings, Depends(get_settings)],
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     ) -> Token:
-        """Login para enviar el formulario OAuth2PasswordRequestForm y entregar el token"""
+        """Login para recibir el formulario OAuth2PasswordRequestForm y entregar el token"""
         try:
             usuario = authenticate_user(username=form_data.username, password=form_data.password, database=database)
         except MyAnyError as error:

@@ -19,5 +19,7 @@ class UsuarioRolOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneUsuarioRolOut(UsuarioRolOut, OneBaseOut):
+class OneUsuarioRolOut(OneBaseOut):
     """Esquema para entregar un usuario-rol"""
+
+    data: UsuarioRolOut | None = None

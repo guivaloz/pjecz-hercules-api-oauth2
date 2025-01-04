@@ -19,5 +19,7 @@ class ModuloOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneModuloOut(ModuloOut, OneBaseOut):
+class OneModuloOut(OneBaseOut):
     """Esquema para entregar un modulo"""
+
+    data: ModuloOut | None = None

@@ -15,5 +15,7 @@ class RolOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneRolOut(RolOut, OneBaseOut):
+class OneRolOut(OneBaseOut):
     """Esquema para entregar un rol"""
+
+    data: RolOut | None = None
