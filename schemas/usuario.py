@@ -8,7 +8,7 @@ from lib.schemas_base import OneBaseOut
 
 
 class Token(BaseModel):
-    """Token"""
+    """Esquema que se entrega al hacer login"""
 
     access_token: str
     expires_in: int

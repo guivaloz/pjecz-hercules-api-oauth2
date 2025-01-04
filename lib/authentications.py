@@ -75,11 +75,9 @@ def authenticate_user(username: str, password: str, database: Session = Depends(
 
 def encode_token(settings: Settings, usuario: UsuarioInDB) -> str:
     """Crear el token"""
-    expiration_timestamp = datetime.now(timezone.utc) + timedelta(seconds=TOKEN_EXPIRES_SECONDS)
-    payload = {
-        "username": usuario.email,
-        "expires_at": expiration_timestamp.timestamp(),
-    }
+    expiration_dt = datetime.now(timezone.utc) + timedelta(seconds=TOKEN_EXPIRES_SECONDS)
+    expires_at = expiration_dt.timestamp()
+    payload = {"username": usuario.email, "expires_at": expires_at}
     return jwt.encode(payload=payload, key=settings.secret_key, algorithm=ALGORITHM)
 
 
@@ -89,6 +87,8 @@ def decode_token(token: str, settings: Settings) -> dict:
         payload = jwt.decode(jwt=token, key=settings.secret_key, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError as error:
         raise MyAuthenticationError("No es válido el token") from error
+    if "expires_at" not in payload or payload["expires_at"] < datetime.now(timezone.utc).timestamp():
+        raise MyAuthenticationError("Ha caducado el token")
     return payload
 
 
@@ -100,18 +100,17 @@ async def get_current_user(
     """Obtener el usuario a partir del token"""
     try:
         decoded_token = decode_token(token, settings)
+        usuario = get_usuario_with_email(database, decoded_token["username"])
     except MyAnyError as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(error),
             headers={"WWW-Authenticate": "Bearer"},
-        ) from error
-    try:
-        usuario = get_usuario_with_email(database, decoded_token.get("username"))
-    except MyAnyError as error:
+        )
+    except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(error),
             headers={"WWW-Authenticate": "Bearer"},
-        ) from error
+        )
     return usuario
