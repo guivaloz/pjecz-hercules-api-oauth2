@@ -29,7 +29,7 @@ def get_usuario(database: Session, usuario_id: int) -> Usuario:
 
 
 @usuarios.get("/{usuario_id}", response_model=OneUsuarioOut)
-async def detalle_usuario(
+async def detalle(
     current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
     database: Annotated[Session, Depends(get_db)],
     usuario_id: int,
@@ -44,8 +44,8 @@ async def detalle_usuario(
     return OneUsuarioOut(success=True, message="Detalle de un usuario", errors=[], data=UsuarioOut.model_validate(usuario))
 
 
-@usuarios.get("/", response_model=CustomPage[UsuarioOut])
-async def paginado_usuarios(
+@usuarios.get("", response_model=CustomPage[UsuarioOut])
+async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
     database: Annotated[Session, Depends(get_db)],
 ):
