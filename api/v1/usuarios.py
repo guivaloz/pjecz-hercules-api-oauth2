@@ -9,8 +9,9 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 from lib.authentications import get_current_user
 from lib.database import Session, get_db
-from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError
+from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from lib.fastapi_pagination_custom_page import CustomPage
+from lib.safe_string import safe_email
 from models.permiso import Permiso
 from models.usuario import Usuario
 from schemas.usuario import OneUsuarioOut, UsuarioInDB, UsuarioOut
@@ -18,9 +19,13 @@ from schemas.usuario import OneUsuarioOut, UsuarioInDB, UsuarioOut
 usuarios = APIRouter(prefix="/api/v1/usuarios", tags=["sistema"])
 
 
-def get_usuario(database: Session, usuario_id: int) -> Usuario:
-    """Consultar un usuario por su ID"""
-    usuario = database.query(Usuario).get(usuario_id)
+def get_usuario_with_email(database: Session, email: str) -> Usuario:
+    """Consultar una usuario por su email"""
+    try:
+        email = safe_email(email)
+    except ValueError:
+        raise MyNotValidParamError("No es válido el email del usuario")
+    usuario = database.query(Usuario).filter(Usuario.email == email).first()
     if usuario is None:
         raise MyNotExistsError("No existe ese usuario")
     if usuario.estatus != "A":
@@ -28,17 +33,17 @@ def get_usuario(database: Session, usuario_id: int) -> Usuario:
     return usuario
 
 
-@usuarios.get("/{usuario_id}", response_model=OneUsuarioOut)
+@usuarios.get("/{email}", response_model=OneUsuarioOut)
 async def detalle(
     current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
     database: Annotated[Session, Depends(get_db)],
-    usuario_id: int,
+    email: str,
 ):
     """Detalle de un usuario a partir de su e-mail"""
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
-        usuario = get_usuario(database, usuario_id)
+        usuario = get_usuario_with_email(database, email)
     except MyAnyError as error:
         return OneUsuarioOut(success=False, message=str(error), errors=[str(error)], data=None)
     return OneUsuarioOut(success=True, message="Detalle de un usuario", errors=[], data=UsuarioOut.model_validate(usuario))

@@ -9,14 +9,47 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 from lib.authentications import get_current_user
 from lib.database import Session, get_db
-from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError
+from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from lib.fastapi_pagination_custom_page import CustomPage
+from lib.safe_string import safe_clave
 from models.autoridad import Autoridad
 from models.permiso import Permiso
 from schemas.autoridad import AutoridadOut, OneAutoridadOut
 from schemas.usuario import UsuarioInDB
 
-autoridades = APIRouter(prefix="/api/v1/autoridades", tags=["materias"])
+autoridades = APIRouter(prefix="/api/v1/autoridades", tags=["autoridades"])
+
+
+def get_autoridad_with_clave(database: Session, clave: str) -> Autoridad:
+    """Consultar una autoridad por su clave"""
+    try:
+        clave = safe_clave(clave)
+    except ValueError:
+        raise MyNotValidParamError("No es válida la clave de la autoridad")
+    autoridad = database.query(Autoridad).filter(Autoridad.clave == clave).first()
+    if autoridad is None:
+        raise MyNotExistsError("No existe esa autoridad")
+    if autoridad.estatus != "A":
+        raise MyIsDeletedError("No es activa ese autoridad, está eliminada")
+    return autoridad
+
+
+@autoridades.get("/{clave}", response_model=OneAutoridadOut)
+async def detalle(
+    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    database: Annotated[Session, Depends(get_db)],
+    clave: str,
+):
+    """Detalle de un autoridad a partir de su ID"""
+    if current_user.permissions.get("AUTORIDADES", 0) < Permiso.VER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    try:
+        autoridad = get_autoridad_with_clave(database, clave)
+    except MyAnyError as error:
+        return OneAutoridadOut(success=False, message=str(error), errors=[str(error)], data=None)
+    return OneAutoridadOut(
+        success=True, message="Detalle de una autoridad", errors=[], data=AutoridadOut.model_validate(autoridad)
+    )
 
 
 @autoridades.get("", response_model=CustomPage[AutoridadOut])

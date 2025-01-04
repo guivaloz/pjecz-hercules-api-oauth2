@@ -8,7 +8,7 @@ from lib.schemas_base import OneBaseOut
 
 
 class AutoridadOut(BaseModel):
-    """Esquema para entregar autoridades"""
+    """Esquema para entregar autoridades para paginado"""
 
     id: int | None = None
     clave: str | None = None

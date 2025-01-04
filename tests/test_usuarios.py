@@ -24,11 +24,11 @@ class TestUsuarios(unittest.TestCase):
             self.fail(error)
         self.assertEqual(response.status_code, 200)
 
-    def test_get_usuarios(self):
-        """Test get usuarios"""
+    def test_get_usuario_username(self):
+        """Test get usuario username"""
         try:
             response = requests.get(
-                url=f"{config['base_url']}/api/v1/usuarios",
+                url=f"{config['base_url']}/api/v1/usuarios/{config['username']}",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
