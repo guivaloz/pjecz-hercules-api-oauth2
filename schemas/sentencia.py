@@ -28,6 +28,8 @@ class SentenciaOut(BaseModel):
     rag_fue_analizado_tiempo: datetime | None = None
     rag_fue_sintetizado_tiempo: datetime | None = None
     rag_fue_categorizado_tiempo: datetime | None = None
+    archivo: str | None = None
+    url: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -42,8 +44,6 @@ class SentenciaCompleteOut(SentenciaOut):
     autoridad_descripcion_corta: str | None = None
     materia_id: int | None = None
     materia_tipo_juicio_id: int | None = None
-    archivo: str | None = None
-    url: str | None = None
     rag_analisis: dict | None = None
     rag_sintesis: dict | None = None
     rag_categorias: dict | None = None

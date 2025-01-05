@@ -2,15 +2,18 @@
 Sentencias, API v1
 """
 
+from datetime import date, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
+from api.v1.autoridades import get_autoridad_with_clave
 from lib.authentications import get_current_user
 from lib.database import Session, get_db
 from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError
 from lib.fastapi_pagination_custom_page import CustomPage
+from models.autoridad import Autoridad
 from models.permiso import Permiso
 from models.sentencia import Sentencia
 from schemas.sentencia import OneSentenciaOut, SentenciaCompleteOut, SentenciaOut
@@ -51,9 +54,30 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
     database: Annotated[Session, Depends(get_db)],
+    autoridad_clave: str = None,
+    creado: date = None,
+    creado_desde: date = None,
+    creado_hasta: date = None,
 ):
     """Paginado de sentencias"""
     if current_user.permissions.get("SENTENCIAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    query = database.query(Sentencia).filter(Sentencia.estatus == "A").order_by(Sentencia.id.desc())
+    query = database.query(Sentencia)
+    if autoridad_clave is not None:
+        try:
+            autoridad = get_autoridad_with_clave(database, autoridad_clave)
+        except MyAnyError as error:
+            return CustomPage(success=False, message=str(error), errors=[str(error)], data=None)
+        query = query.join(Autoridad).filter(Autoridad.clave == autoridad.clave)
+    if creado is not None:
+        query = query.filter(Sentencia.creado >= datetime(creado.year, creado.month, creado.day, 0, 0, 0))
+        query = query.filter(Sentencia.creado <= datetime(creado.year, creado.month, creado.day, 23, 59, 59))
+    else:
+        if creado_desde is not None:
+            query = query.filter(Sentencia.creado >= datetime(creado_desde.year, creado_desde.month, creado_desde.day, 0, 0, 0))
+        if creado_hasta is not None:
+            query = query.filter(
+                Sentencia.creado <= datetime(creado_hasta.year, creado_hasta.month, creado_hasta.day, 23, 59, 59)
+            )
+    query = query.filter(Sentencia.estatus == "A").order_by(Sentencia.id)
     return paginate(query)
