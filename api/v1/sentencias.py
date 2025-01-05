@@ -2,7 +2,7 @@
 Sentencias, API v1
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -16,7 +16,7 @@ from lib.fastapi_pagination_custom_page import CustomPage
 from models.autoridad import Autoridad
 from models.permiso import Permiso
 from models.sentencia import Sentencia
-from schemas.sentencia import OneSentenciaOut, SentenciaCompleteOut, SentenciaOut
+from schemas.sentencia import OneSentenciaOut, SentenciaCompleteOut, SentenciaOut, SentenciaRAGIn
 from schemas.usuario import UsuarioInDB
 
 sentencias = APIRouter(prefix="/api/v1/sentencias", tags=["sentencias"])
@@ -46,7 +46,10 @@ async def detalle(
     except MyAnyError as error:
         return OneSentenciaOut(success=False, message=str(error), errors=[str(error)], data=None)
     return OneSentenciaOut(
-        success=True, message="Detalle de una sentencia", errors=[], data=SentenciaCompleteOut.model_validate(sentencia)
+        success=True,
+        message="Detalle de una sentencia",
+        errors=[],
+        data=SentenciaCompleteOut.model_validate(sentencia),
     )
 
 
@@ -81,3 +84,43 @@ async def paginado(
             )
     query = query.filter(Sentencia.estatus == "A").order_by(Sentencia.id)
     return paginate(query)
+
+
+@sentencias.put("/rag", response_model=OneSentenciaOut)
+async def actualizar_rag(
+    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    database: Annotated[Session, Depends(get_db)],
+    rag: SentenciaRAGIn,
+):
+    """Actualizar Retrieval-Augmented Generation (RAG) de una sentencia"""
+    if current_user.permissions.get("SENTENCIAS", 0) < Permiso.MODIFICAR:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    sentencia = get_sentencia(database, rag.id)
+    hay_cambios = False
+    if rag.analisis is not None and sentencia.rag_analisis != rag.analisis:
+        sentencia.rag_analisis = rag.analisis
+        sentencia.rag_fue_analizado_tiempo = datetime.now(tz=timezone.utc)
+        hay_cambios = True
+    if rag.sintesis is not None and sentencia.rag_sintesis != rag.sintesis:
+        sentencia.rag_sintesis = rag.sintesis
+        sentencia.rag_fue_sintetizado_tiempo = datetime.now(tz=timezone.utc)
+        hay_cambios = True
+    if rag.categorias is not None and sentencia.rag_categorias != rag.categorias:
+        sentencia.rag_categorias = rag.categorias
+        sentencia.rag_fue_categorizado_tiempo = datetime.now(tz=timezone.utc)
+        hay_cambios = True
+    if hay_cambios is False:
+        return OneSentenciaOut(
+            success=False,
+            message="No hay cambios en las columnas RAG de la sentencia",
+            errors=[],
+            data=SentenciaCompleteOut.model_validate(sentencia),
+        )
+    database.add(sentencia)
+    database.commit()
+    return OneSentenciaOut(
+        success=True,
+        message="Se actualizó la sentencia",
+        errors=[],
+        data=SentenciaCompleteOut.model_validate(sentencia),
+    )

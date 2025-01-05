@@ -9,6 +9,15 @@ from pydantic import BaseModel, ConfigDict
 from lib.schemas_base import OneBaseOut
 
 
+class SentenciaRAGIn(BaseModel):
+    """Esquema para recibir una actualización de la sentencia"""
+
+    id: int
+    analisis: dict | None
+    sintesis: dict | None
+    categorias: dict | None
+
+
 class SentenciaOut(BaseModel):
     """Esquema para entregar sentencias para paginado"""
 
