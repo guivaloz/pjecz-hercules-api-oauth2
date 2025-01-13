@@ -62,6 +62,7 @@ async def paginado(
     database: Annotated[Session, Depends(get_db)],
     distrito_clave: str = None,
     materia_clave: str = None,
+    es_jurisdiccional: bool = None,
     es_notaria: bool = None,
 ):
     """Paginado de autoridades"""
@@ -80,6 +81,8 @@ async def paginado(
         except MyAnyError as error:
             return CustomPage(success=False, message=str(error), errors=[str(error)], data=None)
         query = query.join(Materia).filter(Materia.clave == materia.clave)
+    if es_jurisdiccional is not None:
+        query = query.filter(Autoridad.es_jurisdiccional == es_jurisdiccional)
     if es_notaria is not None:
         query = query.filter(Autoridad.es_notaria == es_notaria)
     query = query.filter(Autoridad.estatus == "A").order_by(Autoridad.clave)

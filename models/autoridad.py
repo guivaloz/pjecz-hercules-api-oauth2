@@ -58,6 +58,16 @@ class Autoridad(Base, UniversalMixin):
     sentencias: Mapped[List["Sentencia"]] = relationship("Sentencia", back_populates="autoridad")
     usuarios: Mapped[List["Usuario"]] = relationship("Usuario", back_populates="autoridad")
 
+    @property
+    def distrito_clave(self):
+        """Clave del distrito"""
+        return self.distrito.clave
+
+    @property
+    def distrito_nombre_corto(self):
+        """Nombre corto del distrito"""
+        return self.distrito.nombre_corto
+
     def __repr__(self):
         """Representación"""
         return f"<Autoridad {self.nombre}>"
