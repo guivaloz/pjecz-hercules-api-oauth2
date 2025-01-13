@@ -11,7 +11,8 @@ from lib.authentications import get_current_user
 from lib.database import Session, get_db
 from lib.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from lib.fastapi_pagination_custom_page import CustomPage
-from lib.safe_string import safe_email
+from lib.safe_string import safe_clave, safe_email
+from models.autoridad import Autoridad
 from models.permiso import Permiso
 from models.usuario import Usuario
 from schemas.usuario import OneUsuarioOut, UsuarioInDB, UsuarioOut
@@ -53,9 +54,17 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
     database: Annotated[Session, Depends(get_db)],
+    autoridad_clave: str = None,
 ):
     """Paginado de usuarios"""
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    usuarios_query = database.query(Usuario).filter(Usuario.estatus == "A").order_by(Usuario.email)
-    return paginate(usuarios_query)
+    query = database.query(Usuario)
+    if autoridad_clave is not None:
+        try:
+            clave = safe_clave(autoridad_clave)
+        except ValueError as error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
+        query = query.join(Autoridad).filter(Autoridad.clave == clave).filter(Autoridad.estatus == "A")
+    query = query.filter(Usuario.estatus == "A").order_by(Usuario.email)
+    return paginate(query)

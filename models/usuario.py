@@ -41,6 +41,26 @@ class Usuario(Base, UniversalMixin):
     permisos_consultados = {}
 
     @property
+    def autoridad_clave(self):
+        """Clave de la autoridad"""
+        return self.autoridad.clave
+
+    @property
+    def autoridad_descripcion_corta(self):
+        """Descripción corta de la autoridad"""
+        return self.autoridad.descripcion_corta
+
+    @property
+    def distrito_clave(self):
+        """Clave del distrito de la autoridad"""
+        return self.autoridad.distrito.clave
+
+    @property
+    def distrito_nombre_corto(self):
+        """Nombre corto del distrito de la autoridad"""
+        return self.autoridad.distrito.nombre_corto
+
+    @property
     def nombre(self):
         """Junta nombres, apellido_paterno y apellido materno"""
         return self.nombres + " " + self.apellido_paterno + " " + self.apellido_materno

@@ -55,8 +55,13 @@ class CustomPage(AbstractPage[T], Generic[T], ABC):
 
         if total is None or total == 0:
             return cls(
-                success=True,
+                success=False,
                 message="No se encontraron registros",
+                errors=["No se encontraron registros"],
+                data=[],
+                total=0,
+                limit=raw_params.limit,
+                offset=raw_params.offset,
             )
 
         return cls(
