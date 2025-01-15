@@ -8,6 +8,7 @@
 __pycache__/
 
 /poetry.lock
-/.idea/
-/.venv/
-/venv/
+/.idea
+/.poetry
+/.venv
+/venv
