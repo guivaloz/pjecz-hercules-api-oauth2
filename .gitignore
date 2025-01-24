@@ -2,13 +2,21 @@
 .directory
 .env
 .DS_Store
+.~lock.*
 
+*.code-workspace
+*.csv
+*.log
 *.py[cod]
+*.sql
+*.sqlite
+*.pdf
+*.xlsx
 
 __pycache__/
 
 /poetry.lock
-/.idea
-/.poetry
-/.venv
-/venv
+/.idea/
+/.poetry/
+/.venv/
+/venv/
