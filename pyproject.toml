@@ -1,46 +1,51 @@
-[tool.poetry]
+[project]
 name = "pjecz-hercules-api-oauth2"
-version = "1.0.0"
-description = "API de Plataforma Web con autentificación OAuth2"
-authors = ["Guillermo Valdes <guillermo@movimientolibre.com>"]
-license = "AGPL3"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Guillermo Valdes",email = "guillermo@movimientolibre.com"}
+]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.11"
-psycopg2-binary = "^2.9.10"
-sqlalchemy = "^2.0.37"
-sqlalchemy-utils = "^0.41.2"
-gunicorn = "^23.0.0"
-uvicorn = "^0.34.0"
-unidecode = "^1.3.8"
-pytz = "^2024.2"
-cryptography = "^44.0.0"
-hashids = "^1.3.1"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-pydantic = "^2.10.5"
-pydantic-settings = "^2.7.1"
-fastapi = "^0.115.6"
-fastapi-pagination = {extras = ["sqlalchemy"], version = "^0.12.34"}
-pyjwt = "^2.10.1"
-python-dotenv = "^1.0.1"
-requests = "^2.32.3"
-python-multipart = "^0.0.20"
-google-cloud = "^0.34.0"
-google-cloud-secret-manager = "^2.22.0"
-google-cloud-storage = "^2.19.0"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "cryptography (>=44.0.0,<45.0.0)",
+    "fastapi (>=0.115.6,<0.116.0)",
+    "fastapi-pagination[sqlalchemy] (>=0.12.34,<0.13.0)",
+    "google-auth (>=2.37.0,<3.0.0)",
+    "google-cloud (>=0.34.0,<0.35.0)",
+    "google-cloud-secret-manager (>=2.22.1,<3.0.0)",
+    "google-cloud-storage (>=2.19.0,<3.0.0)",
+    "gunicorn (>=23.0.0,<24.0.0)",
+    "hashids (>=1.3.1,<2.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "pydantic (>=2.10.5,<3.0.0)",
+    "pydantic-settings (>=2.7.1,<3.0.0)",
+    "pyjwt (>=2.10.1,<3.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "pytz (>=2024.2,<2025.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "sqlalchemy (>=2.0.37,<3.0.0)",
+    "sqlalchemy-utils (>=0.41.2,<0.42.0)",
+    "unidecode (>=1.3.8,<2.0.0)",
+    "uvicorn (>=0.34.0,<0.35.0)"
+]
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
 isort = "^5.13.2"
+pre-commit = "^4.1.0"
 pylint = "^3.3.3"
 pylint-sqlalchemy = "^0.3.0"
 pytest = "^8.3.4"
-pre-commit = "^4.0.1"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
