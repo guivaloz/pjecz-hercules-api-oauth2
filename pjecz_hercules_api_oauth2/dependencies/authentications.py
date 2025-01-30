@@ -10,6 +10,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ..models.usuario import Usuario
 from ..schemas.usuario import UsuarioInDB
@@ -32,9 +33,10 @@ def get_usuario_with_email(database: Session, usuario_email: str) -> UsuarioInDB
         email = safe_email(usuario_email)
     except ValueError as error:
         raise MyNotValidParamError("El email no es válido") from error
-    usuario = database.query(Usuario).filter_by(email=email).first()
-    if usuario is None:
-        raise MyNotExistsError("No existe ese usuario")
+    try:
+        usuario = database.query(Usuario).filter_by(email=email).one()
+    except (NoResultFound, MultipleResultsFound) as error:
+        raise MyNotExistsError("No existe ese usuario") from error
     if usuario.estatus != "A":
         raise MyIsDeletedError("No es activo ese usuario, está eliminado")
     datos = {

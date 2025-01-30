@@ -26,5 +26,4 @@ async def paginado(
     """Paginado de roles"""
     if current_user.permissions.get("ROLES", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    query = database.query(Rol).filter(Rol.estatus == "A").order_by(Rol.nombre)
-    return paginate(query)
+    return paginate(database.query(Rol).filter_by(estatus="A").order_by(Rol.nombre))

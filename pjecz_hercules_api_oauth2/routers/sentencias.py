@@ -10,26 +10,15 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
-from ..dependencies.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
+from ..dependencies.safe_string import safe_clave
 from ..models.autoridad import Autoridad
 from ..models.permiso import Permiso
 from ..models.sentencia import Sentencia
 from ..schemas.sentencia import OneSentenciaOut, SentenciaCompleteOut, SentenciaOut, SentenciaRAGIn
 from ..schemas.usuario import UsuarioInDB
-from .autoridades import get_autoridad_with_clave
 
 sentencias = APIRouter(prefix="/api/v1/sentencias", tags=["sentencias"])
-
-
-def get_sentencia(database: Session, sentencia_id: int) -> Sentencia:
-    """Consultar una sentencia por su ID"""
-    sentencia = database.query(Sentencia).get(sentencia_id)
-    if sentencia is None:
-        raise MyNotExistsError("No existe esa sentencia")
-    if sentencia.estatus != "A":
-        raise MyIsDeletedError("No es activa ese sentencia, está eliminada")
-    return sentencia
 
 
 @sentencias.get("/{sentencia_id}", response_model=OneSentenciaOut)
@@ -41,15 +30,13 @@ async def detalle(
     """Detalle de una sentencia a partir de su ID"""
     if current_user.permissions.get("SENTENCIAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    try:
-        sentencia = get_sentencia(database, sentencia_id)
-    except MyAnyError as error:
-        return OneSentenciaOut(success=False, message=str(error), errors=[str(error)], data=None)
+    sentencia = database.query(Sentencia).get(sentencia_id)
+    if sentencia is None:
+        return OneSentenciaOut(success=False, message="No existe esa sentencia")
+    if sentencia.estatus != "A":
+        return OneSentenciaOut(success=False, message="No es activa esa sentencia, está eliminada")
     return OneSentenciaOut(
-        success=True,
-        message="Detalle de una sentencia",
-        errors=[],
-        data=SentenciaCompleteOut.model_validate(sentencia),
+        success=True, message="Detalle de una sentencia", data=SentenciaCompleteOut.model_validate(sentencia)
     )
 
 
@@ -65,25 +52,26 @@ async def paginado(
     """Paginado de sentencias"""
     if current_user.permissions.get("SENTENCIAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    query = database.query(Sentencia)
+    consulta = database.query(Sentencia)
     if autoridad_clave is not None:
         try:
-            autoridad = get_autoridad_with_clave(database, autoridad_clave)
-        except MyAnyError as error:
-            return CustomPage(success=False, message=str(error), errors=[str(error)], data=None)
-        query = query.join(Autoridad).filter(Autoridad.clave == autoridad.clave)
+            autoridad_clave = safe_clave(autoridad_clave)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave de la autoridad")
+        consulta = consulta.join(Autoridad).filter(Autoridad.clave == autoridad_clave).filter(Autoridad.estatus == "A")
     if creado is not None:
-        query = query.filter(Sentencia.creado >= datetime(creado.year, creado.month, creado.day, 0, 0, 0))
-        query = query.filter(Sentencia.creado <= datetime(creado.year, creado.month, creado.day, 23, 59, 59))
+        consulta = consulta.filter(Sentencia.creado >= datetime(creado.year, creado.month, creado.day, 0, 0, 0))
+        consulta = consulta.filter(Sentencia.creado <= datetime(creado.year, creado.month, creado.day, 23, 59, 59))
     else:
         if creado_desde is not None:
-            query = query.filter(Sentencia.creado >= datetime(creado_desde.year, creado_desde.month, creado_desde.day, 0, 0, 0))
+            consulta = consulta.filter(
+                Sentencia.creado >= datetime(creado_desde.year, creado_desde.month, creado_desde.day, 0, 0, 0)
+            )
         if creado_hasta is not None:
-            query = query.filter(
+            consulta = consulta.filter(
                 Sentencia.creado <= datetime(creado_hasta.year, creado_hasta.month, creado_hasta.day, 23, 59, 59)
             )
-    query = query.filter(Sentencia.estatus == "A").order_by(Sentencia.id)
-    return paginate(query)
+    return paginate(consulta.filter(Sentencia.estatus == "A").order_by(Sentencia.id))
 
 
 @sentencias.put("/rag", response_model=OneSentenciaOut)
@@ -95,7 +83,11 @@ async def actualizar_rag(
     """Actualizar Retrieval-Augmented Generation (RAG) de una sentencia"""
     if current_user.permissions.get("SENTENCIAS", 0) < Permiso.MODIFICAR:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    sentencia = get_sentencia(database, rag.id)
+    sentencia = database.query(Sentencia).get(rag.id)
+    if sentencia is None:
+        return OneSentenciaOut(success=False, message="No existe esa sentencia")
+    if sentencia.estatus != "A":
+        return OneSentenciaOut(success=False, message="No es activa esa sentencia, está eliminada")
     hay_cambios = False
     if rag.analisis is not None and sentencia.rag_analisis != rag.analisis:
         sentencia.rag_analisis = rag.analisis

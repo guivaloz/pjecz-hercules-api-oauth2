@@ -12,7 +12,6 @@ T = TypeVar("T")
 class OneBaseOut(BaseModel):
     """OneBaseOut"""
 
-    success: bool = True
-    message: str = "Success"
-    errors: list[str]
-    data: list[T]
+    success: bool
+    message: str
+    data: list[T] = None

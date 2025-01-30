@@ -1,15 +1,15 @@
 """
-Autoridades, API v1
+Autoridades
 """
 
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
-from ..dependencies.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
 from ..models.autoridad import Autoridad
@@ -18,24 +18,8 @@ from ..models.materia import Materia
 from ..models.permiso import Permiso
 from ..schemas.autoridad import AutoridadOut, OneAutoridadOut
 from ..schemas.usuario import UsuarioInDB
-from .distritos import get_distrito_with_clave
-from .materias import get_materia_with_clave
 
 autoridades = APIRouter(prefix="/api/v1/autoridades", tags=["autoridades"])
-
-
-def get_autoridad_with_clave(database: Session, clave: str) -> Autoridad:
-    """Consultar una autoridad por su clave"""
-    try:
-        clave = safe_clave(clave)
-    except ValueError:
-        raise MyNotValidParamError("No es válida la clave de la autoridad")
-    autoridad = database.query(Autoridad).filter(Autoridad.clave == clave).first()
-    if autoridad is None:
-        raise MyNotExistsError("No existe esa autoridad")
-    if autoridad.estatus != "A":
-        raise MyIsDeletedError("No es activa ese autoridad, está eliminada")
-    return autoridad
 
 
 @autoridades.get("/{clave}", response_model=OneAutoridadOut)
@@ -48,12 +32,16 @@ async def detalle(
     if current_user.permissions.get("AUTORIDADES", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
-        autoridad = get_autoridad_with_clave(database, clave)
-    except MyAnyError as error:
-        return OneAutoridadOut(success=False, message=str(error), errors=[str(error)], data=None)
-    return OneAutoridadOut(
-        success=True, message="Detalle de una autoridad", errors=[], data=AutoridadOut.model_validate(autoridad)
-    )
+        clave = safe_clave(clave)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave")
+    try:
+        autoridad = database.query(Autoridad).filter(Autoridad.clave == clave).one()
+    except (MultipleResultsFound, NoResultFound):
+        return OneAutoridadOut(success=False, message="No existe esa autoridad")
+    if autoridad.estatus != "A":
+        return OneAutoridadOut(success=False, message="No es activa ese autoridad, está eliminada")
+    return OneAutoridadOut(success=True, message="Detalle de una autoridad", data=AutoridadOut.model_validate(autoridad))
 
 
 @autoridades.get("", response_model=CustomPage[AutoridadOut])
@@ -68,22 +56,21 @@ async def paginado(
     """Paginado de autoridades"""
     if current_user.permissions.get("AUTORIDADES", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    query = database.query(Autoridad)
+    consulta = database.query(Autoridad)
     if distrito_clave is not None:
         try:
-            distrito = get_distrito_with_clave(database, distrito_clave)
-        except MyAnyError as error:
-            return CustomPage(success=False, message=str(error), errors=[str(error)], data=None)
-        query = query.join(Distrito).filter(Distrito.clave == distrito.clave)
+            distrito_clave = safe_clave(distrito_clave)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave del distrito")
+        consulta = consulta.join(Distrito).filter(Distrito.clave == distrito_clave).filter(Distrito.estatus == "A")
     if materia_clave is not None:
         try:
-            materia = get_materia_with_clave(database, materia_clave)
-        except MyAnyError as error:
-            return CustomPage(success=False, message=str(error), errors=[str(error)], data=None)
-        query = query.join(Materia).filter(Materia.clave == materia.clave)
+            materia_clave = safe_clave(materia_clave)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave del materia")
+        consulta = consulta.join(Materia).filter(Materia.clave == materia_clave).filter(Materia.estatus == "A")
     if es_jurisdiccional is not None:
-        query = query.filter(Autoridad.es_jurisdiccional == es_jurisdiccional)
+        consulta = consulta.filter(Autoridad.es_jurisdiccional == es_jurisdiccional)
     if es_notaria is not None:
-        query = query.filter(Autoridad.es_notaria == es_notaria)
-    query = query.filter(Autoridad.estatus == "A").order_by(Autoridad.clave)
-    return paginate(query)
+        consulta = consulta.filter(Autoridad.es_notaria == es_notaria)
+    return paginate(consulta.filter(Autoridad.estatus == "A").order_by(Autoridad.clave))

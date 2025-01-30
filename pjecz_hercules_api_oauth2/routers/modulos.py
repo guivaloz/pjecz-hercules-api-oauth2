@@ -26,5 +26,4 @@ async def paginado(
     """Paginado de modulos"""
     if current_user.permissions.get("MODULOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    query = database.query(Modulo).filter(Modulo.estatus == "A").order_by(Modulo.nombre)
-    return paginate(query)
+    return paginate(database.query(Modulo).filter_by(estatus="A").order_by(Modulo.nombre))
