@@ -12,13 +12,13 @@ from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
-from ..models.autoridad import Autoridad
-from ..models.permiso import Permiso
-from ..models.sentencia import Sentencia
+from ..models.autoridades import Autoridad
+from ..models.permisos import Permiso
+from ..models.sentencias import Sentencia
 from ..schemas.sentencia import OneSentenciaOut, SentenciaCompleteOut, SentenciaOut, SentenciaRAGIn
 from ..schemas.usuario import UsuarioInDB
 
-sentencias = APIRouter(prefix="/api/v1/sentencias", tags=["sentencias"])
+sentencias = APIRouter(prefix="/api/v5/sentencias", tags=["sentencias"])
 
 
 @sentencias.get("/{sentencia_id}", response_model=OneSentenciaOut)

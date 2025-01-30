@@ -12,12 +12,12 @@ from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
-from ..models.distrito import Distrito
-from ..models.permiso import Permiso
+from ..models.distritos import Distrito
+from ..models.permisos import Permiso
 from ..schemas.distrito import DistritoOut, OneDistritoOut
 from ..schemas.usuario import UsuarioInDB
 
-distritos = APIRouter(prefix="/api/v1/distritos", tags=["distritos"])
+distritos = APIRouter(prefix="/api/v5/distritos", tags=["distritos"])
 
 
 @distritos.get("/{clave}", response_model=OneDistritoOut)

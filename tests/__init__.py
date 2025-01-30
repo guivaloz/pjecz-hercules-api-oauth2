@@ -1,5 +1,5 @@
 """
-Init
+Tests Init
 """
 
 import os
@@ -15,7 +15,7 @@ load_dotenv()
 config = {
     "username": os.getenv("USERNAME"),
     "password": os.getenv("PASSWORD"),
-    "base_url": os.getenv("BASE_URL", "http://localhost:8000"),
+    "base_url": os.getenv("BASE_URL", "http://127.0.0.1:8000"),
     "timeout": int(os.getenv("TIMEOUT", "10")),
 }
 

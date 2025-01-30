@@ -11,13 +11,13 @@ from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
-from ..models.materia import Materia
-from ..models.materia_tipo_juicio import MateriaTipoJuicio
-from ..models.permiso import Permiso
+from ..models.materias import Materia
+from ..models.materias_tipos_juicios import MateriaTipoJuicio
+from ..models.permisos import Permiso
 from ..schemas.materia_tipo_juicio import MateriaTipoJuicioOut
 from ..schemas.usuario import UsuarioInDB
 
-materias_tipos_juicios = APIRouter(prefix="/api/v1/materias_tipos_juicios", tags=["materias"])
+materias_tipos_juicios = APIRouter(prefix="/api/v5/materias_tipos_juicios", tags=["materias"])
 
 
 @materias_tipos_juicios.get("", response_model=CustomPage[MateriaTipoJuicioOut])

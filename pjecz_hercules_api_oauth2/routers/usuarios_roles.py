@@ -11,13 +11,13 @@ from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_email
-from ..models.permiso import Permiso
-from ..models.usuario import Usuario
-from ..models.usuario_rol import UsuarioRol
+from ..models.permisos import Permiso
+from ..models.usuarios import Usuario
+from ..models.usuarios_roles import UsuarioRol
 from ..schemas.usuario import UsuarioInDB
 from ..schemas.usuario_rol import UsuarioRolOut
 
-usuarios_roles = APIRouter(prefix="/api/v1/usuarios_roles", tags=["sistema"])
+usuarios_roles = APIRouter(prefix="/api/v5/usuarios_roles", tags=["sistema"])
 
 
 @usuarios_roles.get("", response_model=CustomPage[UsuarioRolOut])

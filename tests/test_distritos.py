@@ -14,9 +14,11 @@ class TestDistritos(unittest.TestCase):
 
     def test_get_distritos(self):
         """Test get distritos"""
+
+        # Consultar los distritos
         try:
             response = requests.get(
-                url=f"{config['base_url']}/api/v1/distritos",
+                url=f"{config['base_url']}/api/v5/distritos",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -24,12 +26,24 @@ class TestDistritos(unittest.TestCase):
             self.fail(error)
         self.assertEqual(response.status_code, 200)
 
+        # Validar el contenido de la respuesta
+        contenido = response.json()
+        self.assertEqual("success" in contenido, True)
+        self.assertEqual("message" in contenido, True)
+        self.assertEqual("data" in contenido, True)
+
+        # Validar que se haya tenido éxito
+        self.assertEqual(contenido["success"], True)
+
+        # Validar que en los datos haya el listado de autoridades
+        self.assertEqual(type(contenido["data"]), list)
+
     def test_get_distrito_dtrc(self):
         """Test get distrito DTRC"""
         clave = "dtrc"
         try:
             response = requests.get(
-                url=f"{config['base_url']}/api/v1/distritos/{clave}",
+                url=f"{config['base_url']}/api/v5/distritos/{clave}",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )

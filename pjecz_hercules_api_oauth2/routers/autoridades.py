@@ -12,14 +12,14 @@ from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
-from ..models.autoridad import Autoridad
-from ..models.distrito import Distrito
-from ..models.materia import Materia
-from ..models.permiso import Permiso
+from ..models.autoridades import Autoridad
+from ..models.distritos import Distrito
+from ..models.materias import Materia
+from ..models.permisos import Permiso
 from ..schemas.autoridad import AutoridadOut, OneAutoridadOut
 from ..schemas.usuario import UsuarioInDB
 
-autoridades = APIRouter(prefix="/api/v1/autoridades", tags=["autoridades"])
+autoridades = APIRouter(prefix="/api/v5/autoridades", tags=["autoridades"])
 
 
 @autoridades.get("/{clave}", response_model=OneAutoridadOut)

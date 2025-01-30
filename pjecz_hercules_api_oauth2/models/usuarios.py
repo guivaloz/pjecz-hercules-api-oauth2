@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..dependencies.database import Base
 from ..dependencies.universal_mixin import UniversalMixin
-from ..models.permiso import Permiso
+from ..models.permisos import Permiso
 
 
 class Usuario(Base, UniversalMixin):

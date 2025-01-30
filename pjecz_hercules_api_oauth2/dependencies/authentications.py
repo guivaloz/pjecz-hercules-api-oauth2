@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
-from ..models.usuario import Usuario
+from ..models.usuarios import Usuario
 from ..schemas.usuario import UsuarioInDB
 from ..settings import Settings, get_settings
 from .database import Session, get_db

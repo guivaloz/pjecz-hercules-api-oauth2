@@ -10,12 +10,12 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
-from ..models.modulo import Modulo
-from ..models.permiso import Permiso
+from ..models.modulos import Modulo
+from ..models.permisos import Permiso
 from ..schemas.modulo import ModuloOut
 from ..schemas.usuario import UsuarioInDB
 
-modulos = APIRouter(prefix="/api/v1/modulos", tags=["sistema"])
+modulos = APIRouter(prefix="/api/v5/modulos", tags=["sistema"])
 
 
 @modulos.get("", response_model=CustomPage[ModuloOut])

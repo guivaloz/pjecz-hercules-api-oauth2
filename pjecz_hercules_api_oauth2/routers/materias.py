@@ -12,12 +12,12 @@ from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
-from ..models.materia import Materia
-from ..models.permiso import Permiso
+from ..models.materias import Materia
+from ..models.permisos import Permiso
 from ..schemas.materia import MateriaOut, OneMateriaOut
 from ..schemas.usuario import UsuarioInDB
 
-materias = APIRouter(prefix="/api/v1/materias", tags=["materias"])
+materias = APIRouter(prefix="/api/v5/materias", tags=["materias"])
 
 
 @materias.get("/{clave}", response_model=OneMateriaOut)
