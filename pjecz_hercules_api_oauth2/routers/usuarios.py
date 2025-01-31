@@ -9,29 +9,14 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 from ..dependencies.authentications import get_current_user
 from ..dependencies.database import Session, get_db
-from ..dependencies.exceptions import MyAnyError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave, safe_email
-from ..models.autoridad import Autoridad
-from ..models.permiso import Permiso
-from ..models.usuario import Usuario
+from ..models.autoridades import Autoridad
+from ..models.permisos import Permiso
+from ..models.usuarios import Usuario
 from ..schemas.usuario import OneUsuarioOut, UsuarioInDB, UsuarioOut
 
-usuarios = APIRouter(prefix="/api/v1/usuarios", tags=["sistema"])
-
-
-def get_usuario_with_email(database: Session, email: str) -> Usuario:
-    """Consultar una usuario por su email"""
-    try:
-        email = safe_email(email)
-    except ValueError:
-        raise MyNotValidParamError("No es válido el email del usuario")
-    usuario = database.query(Usuario).filter(Usuario.email == email).first()
-    if usuario is None:
-        raise MyNotExistsError("No existe ese usuario")
-    if usuario.estatus != "A":
-        raise MyIsDeletedError("No es activo ese usuario, está eliminado")
-    return usuario
+usuarios = APIRouter(prefix="/api/v5/usuarios", tags=["sistema"])
 
 
 @usuarios.get("/{email}", response_model=OneUsuarioOut)
@@ -44,10 +29,15 @@ async def detalle(
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
-        usuario = get_usuario_with_email(database, email)
-    except MyAnyError as error:
-        return OneUsuarioOut(success=False, message=str(error), errors=[str(error)], data=None)
-    return OneUsuarioOut(success=True, message="Detalle de un usuario", errors=[], data=UsuarioOut.model_validate(usuario))
+        email = safe_email(email)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válido el e-mail")
+    usuario = database.query(Usuario).filter(Usuario.email == email).first()
+    if usuario is None:
+        return OneUsuarioOut(success=False, message="No existe ese usuario")
+    if usuario.estatus != "A":
+        return OneUsuarioOut(success=False, message="No es activo ese usuario, está eliminado")
+    return OneUsuarioOut(success=True, message="Detalle de un usuario", data=UsuarioOut.model_validate(usuario))
 
 
 @usuarios.get("", response_model=CustomPage[UsuarioOut])
@@ -59,12 +49,11 @@ async def paginado(
     """Paginado de usuarios"""
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    query = database.query(Usuario)
+    consulta = database.query(Usuario)
     if autoridad_clave is not None:
         try:
             clave = safe_clave(autoridad_clave)
-        except ValueError as error:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
-        query = query.join(Autoridad).filter(Autoridad.clave == clave).filter(Autoridad.estatus == "A")
-    query = query.filter(Usuario.estatus == "A").order_by(Usuario.email)
-    return paginate(query)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válido el e-mail")
+        consulta = consulta.join(Autoridad).filter(Autoridad.clave == clave).filter(Autoridad.estatus == "A")
+    return paginate(consulta.filter(Usuario.estatus == "A").order_by(Usuario.email))

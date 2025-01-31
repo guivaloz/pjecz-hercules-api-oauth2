@@ -20,3 +20,5 @@ __pycache__/
 /.poetry/
 /.venv/
 /venv/
+
+requirements.txt

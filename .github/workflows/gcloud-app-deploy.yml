@@ -11,14 +11,29 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+
     steps:
-      - uses: "actions/checkout@v3"
-      - name: "authenticate"
+      - name: "Check out the repository"
+        uses: "actions/checkout@v3"
+
+      - name: "Setup Python"
+        uses: "actions/setup-python@v4"
+        with:
+          python-version: '3.11'
+
+      - name: "Install Poetry"
+        run: pip install poetry
+
+      - name: "Export dependencies to requirements.txt"
+        run: poetry export --without-hashes --output requirements.txt
+
+      - name: "Authenticate"
         uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SA_KEY }}
-      - name: "deploy"
+
+      - name: "Deploy"
         uses: "google-github-actions/deploy-appengine@v1"
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
