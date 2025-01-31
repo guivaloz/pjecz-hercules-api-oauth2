@@ -15,10 +15,10 @@ class TestRoles(unittest.TestCase):
     def test_get_roles(self):
         """Test get roles"""
 
-        # Consultar los roles
+        # Consultar
         try:
             response = requests.get(
-                url=f"{config['base_url']}/api/v5/roles",
+                url=f"{config['api_base_url']}/api/v5/roles",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -35,8 +35,10 @@ class TestRoles(unittest.TestCase):
         # Validar que se haya tenido éxito
         self.assertEqual(contenido["success"], True)
 
-        # Validar que en los datos haya el listado de autoridades
+        # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
+        for item in contenido["data"]:
+            self.assertEqual("nombre" in item, True)
 
 
 if __name__ == "__main__":

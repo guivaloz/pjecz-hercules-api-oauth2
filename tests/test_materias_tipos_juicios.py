@@ -15,10 +15,10 @@ class TestMateriasTiposJuicios(unittest.TestCase):
     def test_get_materias_tipos_juicios(self):
         """Test get materias_tipos_juicios"""
 
-        # Consultar los tipos de juicios
+        # Consultar
         try:
             response = requests.get(
-                url=f"{config['base_url']}/api/v5/materias_tipos_juicios",
+                url=f"{config['api_base_url']}/api/v5/materias_tipos_juicios",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -35,8 +35,14 @@ class TestMateriasTiposJuicios(unittest.TestCase):
         # Validar que se haya tenido éxito
         self.assertEqual(contenido["success"], True)
 
-        # Validar que en los datos haya el listado de autoridades
+        # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
+        for item in contenido["data"]:
+            self.assertEqual("id" in item, True)
+            self.assertEqual("materia_id" in item, True)
+            self.assertEqual("materia_clave" in item, True)
+            self.assertEqual("materia_nombre" in item, True)
+            self.assertEqual("descripcion" in item, True)
 
 
 if __name__ == "__main__":

@@ -26,8 +26,8 @@ from .settings import Settings, get_settings
 
 # FastAPI
 app = FastAPI(
-    title="PJECZ Hércules API Oauth2",
-    description="API para trabajar con la base de datos Plataforma Web con autentificación OAuth2",
+    title="Hércules API OAuth2 del Poder Judicial del Estado de Coahuila de Zaragoza",
+    description="Trabajar con la base de datos 'Plataforma Web'. Uso interno solamente.",
     docs_url="/docs",
     redoc_url=None,
 )
@@ -51,7 +51,7 @@ add_pagination(app)
 @app.get("/")
 async def root() -> dict:
     """Mensaje de bienvenida"""
-    return {"message": "API para trabajar con la base de datos Plataforma Web con autentificación OAuth2"}
+    return {"message": "Bienvenido a Hércules API OAuth2 del Poder Judicial del Estado de Coahuila de Zaragoza"}
 
 
 @app.post("/token", response_model=Token)

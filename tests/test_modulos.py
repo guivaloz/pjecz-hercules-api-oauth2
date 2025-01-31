@@ -15,10 +15,10 @@ class TestModulos(unittest.TestCase):
     def test_get_modulos(self):
         """Test get modulos"""
 
-        # Consultar los modulos
+        # Consultar
         try:
             response = requests.get(
-                url=f"{config['base_url']}/api/v5/modulos",
+                url=f"{config['api_base_url']}/api/v5/modulos",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -35,8 +35,14 @@ class TestModulos(unittest.TestCase):
         # Validar que se haya tenido éxito
         self.assertEqual(contenido["success"], True)
 
-        # Validar que en los datos haya el listado de autoridades
+        # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
+        for item in contenido["data"]:
+            self.assertEqual("nombre_corto" in item, True)
+            self.assertEqual("nombre" in item, True)
+            self.assertEqual("icono" in item, True)
+            self.assertEqual("ruta" in item, True)
+            self.assertEqual("en_navegacion" in item, True)
 
 
 if __name__ == "__main__":
