@@ -33,4 +33,4 @@ class Distrito(Base, UniversalMixin):
 
     def __repr__(self):
         """Representación"""
-        return f"<Distrito {self.nombre}>"
+        return f"<Distrito {self.clave}>"

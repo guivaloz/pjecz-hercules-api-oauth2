@@ -38,13 +38,12 @@ class TestDistritos(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
-            self.assertEqual("id" in item, True)
             self.assertEqual("clave" in item, True)
+            self.assertEqual("nombre" in item, True)
+            self.assertEqual("nombre_corto" in item, True)
             self.assertEqual("es_distrito_judicial" in item, True)
             self.assertEqual("es_distrito" in item, True)
             self.assertEqual("es_jurisdiccional" in item, True)
-            self.assertEqual("nombre_corto" in item, True)
-            self.assertEqual("nombre" in item, True)
 
     def test_get_distrito_by_clave(self):
         """Test get distrito by clave"""
@@ -76,12 +75,11 @@ class TestDistritos(unittest.TestCase):
             item = contenido["data"]
             self.assertEqual("clave" in item, True)
             self.assertEqual(item["clave"] == clave, True)
-            self.assertEqual("id" in item, True)
+            self.assertEqual("nombre" in item, True)
+            self.assertEqual("nombre_corto" in item, True)
             self.assertEqual("es_distrito_judicial" in item, True)
             self.assertEqual("es_distrito" in item, True)
             self.assertEqual("es_jurisdiccional" in item, True)
-            self.assertEqual("nombre_corto" in item, True)
-            self.assertEqual("nombre" in item, True)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 """
-Usuarios-Roles, API v1
+Usuarios-Roles
 """
 
 from typing import Annotated
@@ -7,22 +7,22 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.authentications import get_current_user
+from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_email
 from ..models.permisos import Permiso
 from ..models.usuarios import Usuario
 from ..models.usuarios_roles import UsuarioRol
-from ..schemas.usuario import UsuarioInDB
-from ..schemas.usuario_rol import UsuarioRolOut
+from ..schemas.usuarios import UsuarioInDB
+from ..schemas.usuarios_roles import UsuarioRolOut
 
 usuarios_roles = APIRouter(prefix="/api/v5/usuarios_roles", tags=["sistema"])
 
 
 @usuarios_roles.get("", response_model=CustomPage[UsuarioRolOut])
 async def paginado(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     rol_id: int = None,
     usuario_email: str = None,

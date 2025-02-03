@@ -1,43 +1,38 @@
 """
-Sentencias, modelos
+Edictos, modelos
 """
 
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import JSON, Date, ForeignKey, String
+from sqlalchemy import JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..dependencies.database import Base
 from ..dependencies.universal_mixin import UniversalMixin
 
 
-class Sentencia(Base, UniversalMixin):
-    """Sentencia"""
+class Edicto(Base, UniversalMixin):
+    """Edicto"""
 
     # Nombre de la tabla
-    __tablename__ = "sentencias"
+    __tablename__ = "edictos"
 
     # Clave primaria
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Claves foráneas
+    # Clave foránea
     autoridad_id: Mapped[int] = mapped_column(ForeignKey("autoridades.id"))
-    autoridad: Mapped["Autoridad"] = relationship(back_populates="sentencias")
-    materia_tipo_juicio_id: Mapped[int] = mapped_column(ForeignKey("materias_tipos_juicios.id"))
-    materia_tipo_juicio: Mapped["MateriaTipoJuicio"] = relationship(back_populates="sentencias")
+    autoridad: Mapped["Autoridad"] = relationship(back_populates="edictos")
 
     # Columnas
-    sentencia: Mapped[str] = mapped_column(String(16))
-    sentencia_fecha: Mapped[Optional[date]] = mapped_column(Date(), index=True)
-    expediente: Mapped[str] = mapped_column(String(16))
-    expediente_anio: Mapped[int]
-    expediente_num: Mapped[int]
     fecha: Mapped[date] = mapped_column(index=True)
-    descripcion: Mapped[str] = mapped_column(String(1024))
-    es_perspectiva_genero: Mapped[bool] = mapped_column(default=False)
-    archivo: Mapped[str] = mapped_column(String(256), default="", server_default="")
-    url: Mapped[str] = mapped_column(String(512), default="", server_default="")
+    descripcion: Mapped[str] = mapped_column(String(256))
+    expediente: Mapped[str] = mapped_column(String(16))
+    numero_publicacion: Mapped[str] = mapped_column(String(16))
+    archivo: Mapped[str] = mapped_column(String(256), default="")
+    url: Mapped[str] = mapped_column(String(512), default="")
+    es_declaracion_de_ausencia: Mapped[bool] = mapped_column(default=False)
 
     # Columnas para Retrieval-Augmented Generation (RAG)
     rag_fue_analizado_tiempo: Mapped[Optional[datetime]]
@@ -77,21 +72,6 @@ class Sentencia(Base, UniversalMixin):
         """Autoridad descripción corta"""
         return self.autoridad.descripcion_corta
 
-    @property
-    def materia_clave(self):
-        """Clave de la materia"""
-        return self.materia_tipo_juicio.materia.clave
-
-    @property
-    def materia_nombre(self):
-        """Nombre de la materia"""
-        return self.materia_tipo_juicio.materia.nombre
-
-    @property
-    def materia_tipo_juicio_descripcion(self):
-        """Descripción del tipo de juicio"""
-        return self.materia_tipo_juicio.descripcion
-
     def __repr__(self):
         """Representación"""
-        return f"<Sentencia {self.id}>"
+        return f"<Edicto {self.id}>"

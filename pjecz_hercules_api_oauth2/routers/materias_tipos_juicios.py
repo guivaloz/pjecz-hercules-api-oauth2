@@ -1,5 +1,5 @@
 """
-Materias Tipos de Juicios, API v1
+Materias Tipos de Juicios
 """
 
 from typing import Annotated
@@ -7,22 +7,22 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.authentications import get_current_user
+from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
 from ..models.materias import Materia
 from ..models.materias_tipos_juicios import MateriaTipoJuicio
 from ..models.permisos import Permiso
-from ..schemas.materia_tipo_juicio import MateriaTipoJuicioOut
-from ..schemas.usuario import UsuarioInDB
+from ..schemas.materias_tipos_juicios import MateriaTipoJuicioOut
+from ..schemas.usuarios import UsuarioInDB
 
 materias_tipos_juicios = APIRouter(prefix="/api/v5/materias_tipos_juicios", tags=["materias"])
 
 
 @materias_tipos_juicios.get("", response_model=CustomPage[MateriaTipoJuicioOut])
 async def paginado(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     materia_clave: str = None,
 ):

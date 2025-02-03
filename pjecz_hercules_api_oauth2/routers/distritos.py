@@ -8,21 +8,21 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from ..dependencies.authentications import get_current_user
+from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
 from ..models.distritos import Distrito
 from ..models.permisos import Permiso
-from ..schemas.distrito import DistritoOut, OneDistritoOut
-from ..schemas.usuario import UsuarioInDB
+from ..schemas.distritos import DistritoOut, OneDistritoOut
+from ..schemas.usuarios import UsuarioInDB
 
 distritos = APIRouter(prefix="/api/v5/distritos", tags=["distritos"])
 
 
 @distritos.get("/{clave}", response_model=OneDistritoOut)
 async def detalle(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     clave: str,
 ):
@@ -44,7 +44,7 @@ async def detalle(
 
 @distritos.get("", response_model=CustomPage[DistritoOut])
 async def paginado(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
 ):
     """Paginado de distritos"""

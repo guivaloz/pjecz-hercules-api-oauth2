@@ -38,6 +38,7 @@ class TestRoles(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
+            self.assertEqual("id" in item, True)
             self.assertEqual("nombre" in item, True)
 
 

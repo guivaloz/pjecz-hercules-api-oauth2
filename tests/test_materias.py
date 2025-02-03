@@ -38,7 +38,6 @@ class TestMaterias(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
-            self.assertEqual("id" in item, True)
             self.assertEqual("clave" in item, True)
             self.assertEqual("nombre" in item, True)
             self.assertEqual("descripcion" in item, True)
@@ -74,7 +73,6 @@ class TestMaterias(unittest.TestCase):
             item = contenido["data"]
             self.assertEqual("clave" in item, True)
             self.assertEqual(item["clave"] == clave, True)
-            self.assertEqual("id" in item, True)
             self.assertEqual("nombre" in item, True)
             self.assertEqual("descripcion" in item, True)
             self.assertEqual("en_sentencias" in item, True)

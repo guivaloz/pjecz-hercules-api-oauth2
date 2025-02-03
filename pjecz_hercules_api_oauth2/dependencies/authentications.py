@@ -13,7 +13,7 @@ from passlib.context import CryptContext
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ..models.usuarios import Usuario
-from ..schemas.usuario import UsuarioInDB
+from ..schemas.usuarios import UsuarioInDB
 from ..settings import Settings, get_settings
 from .database import Session, get_db
 from .exceptions import MyAnyError, MyAuthenticationError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
@@ -94,7 +94,7 @@ def decode_token(token: str, settings: Settings) -> dict:
     return payload
 
 
-async def get_current_user(
+async def get_current_active_user(
     database: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
     token: Annotated[str, Depends(oauth2_scheme)],

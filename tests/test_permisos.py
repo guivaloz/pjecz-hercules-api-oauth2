@@ -38,6 +38,7 @@ class TestPermisos(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
+            self.assertEqual("id" in item, True)
             self.assertEqual("rol_id" in item, True)
             self.assertEqual("rol_nombre" in item, True)
             self.assertEqual("modulo_id" in item, True)

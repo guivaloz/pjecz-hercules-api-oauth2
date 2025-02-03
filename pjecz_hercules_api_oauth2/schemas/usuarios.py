@@ -19,7 +19,6 @@ class Token(BaseModel):
 class UsuarioOut(BaseModel):
     """Esquema para entregar usuarios"""
 
-    id: int | None = None
     apellido_paterno: str | None = None
     apellido_materno: str | None = None
     autoridad_clave: str | None = None

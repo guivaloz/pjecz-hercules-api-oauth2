@@ -38,13 +38,13 @@ class TestAutoridades(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
-            self.assertEqual("id" in item, True)
             self.assertEqual("clave" in item, True)
-            self.assertEqual("descripcion" in item, True)
-            self.assertEqual("descripcion_corta" in item, True)
-            self.assertEqual("distrito_id" in item, True)
             self.assertEqual("distrito_clave" in item, True)
             self.assertEqual("distrito_nombre_corto" in item, True)
+            self.assertEqual("materia_clave" in item, True)
+            self.assertEqual("materia_nombre" in item, True)
+            self.assertEqual("descripcion" in item, True)
+            self.assertEqual("descripcion_corta" in item, True)
             self.assertEqual("directorio_edictos" in item, True)
             self.assertEqual("directorio_glosas" in item, True)
             self.assertEqual("directorio_listas_de_acuerdos" in item, True)
@@ -87,10 +87,8 @@ class TestAutoridades(unittest.TestCase):
             item = contenido["data"]
             self.assertEqual("clave" in item, True)
             self.assertEqual(item["clave"] == clave, True)
-            self.assertEqual("id" in item, True)
             self.assertEqual("descripcion" in item, True)
             self.assertEqual("descripcion_corta" in item, True)
-            self.assertEqual("distrito_id" in item, True)
             self.assertEqual("distrito_clave" in item, True)
             self.assertEqual("distrito_nombre_corto" in item, True)
             self.assertEqual("directorio_edictos" in item, True)

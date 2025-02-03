@@ -1,5 +1,5 @@
 """
-Permisos, API v1
+Permisos
 """
 
 from typing import Annotated
@@ -7,21 +7,21 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.authentications import get_current_user
+from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..models.modulos import Modulo
 from ..models.permisos import Permiso
 from ..models.roles import Rol
-from ..schemas.permiso import PermisoOut
-from ..schemas.usuario import UsuarioInDB
+from ..schemas.permisos import PermisoOut
+from ..schemas.usuarios import UsuarioInDB
 
 permisos = APIRouter(prefix="/api/v5/permisos", tags=["sistema"])
 
 
 @permisos.get("", response_model=CustomPage[PermisoOut])
 async def paginado(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     modulo_id: int = None,
     rol_id: int = None,
