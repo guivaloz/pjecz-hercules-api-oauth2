@@ -10,12 +10,12 @@ from ..dependencies.schemas_base import OneBaseOut
 class ModuloOut(BaseModel):
     """Esquema para entregar modulos"""
 
-    id: int | None = None
-    nombre_corto: str | None = None
-    nombre: str | None = None
-    icono: str | None = None
-    ruta: str | None = None
-    en_navegacion: bool | None = None
+    id: int
+    nombre_corto: str
+    nombre: str
+    icono: str
+    ruta: str
+    en_navegacion: bool
     model_config = ConfigDict(from_attributes=True)
 
 

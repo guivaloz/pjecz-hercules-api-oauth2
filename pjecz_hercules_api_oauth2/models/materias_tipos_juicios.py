@@ -42,4 +42,4 @@ class MateriaTipoJuicio(Base, UniversalMixin):
 
     def __repr__(self):
         """Representación"""
-        return f"<MateriaTipoJuicio {self.nombre}>"
+        return f"<MateriaTipoJuicio {self.id}>"

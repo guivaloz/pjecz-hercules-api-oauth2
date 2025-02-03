@@ -1,5 +1,5 @@
 """
-Usuarios, v1
+Usuarios
 """
 
 from typing import Annotated
@@ -7,21 +7,21 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.authentications import get_current_user
+from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave, safe_email
 from ..models.autoridades import Autoridad
 from ..models.permisos import Permiso
 from ..models.usuarios import Usuario
-from ..schemas.usuario import OneUsuarioOut, UsuarioInDB, UsuarioOut
+from ..schemas.usuarios import OneUsuarioOut, UsuarioInDB, UsuarioOut
 
 usuarios = APIRouter(prefix="/api/v5/usuarios", tags=["sistema"])
 
 
 @usuarios.get("/{email}", response_model=OneUsuarioOut)
 async def detalle(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     email: str,
 ):
@@ -42,7 +42,7 @@ async def detalle(
 
 @usuarios.get("", response_model=CustomPage[UsuarioOut])
 async def paginado(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     autoridad_clave: str = None,
 ):

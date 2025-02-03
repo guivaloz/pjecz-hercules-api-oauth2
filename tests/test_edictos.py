@@ -1,5 +1,5 @@
 """
-Unit Tests Sentencias
+Unit tests for edictos
 """
 
 import unittest
@@ -9,16 +9,16 @@ import requests
 from tests import config, oauth2_token
 
 
-class TestSentencias(unittest.TestCase):
-    """Tests Sentencias class"""
+class TestEdictos(unittest.TestCase):
+    """Tests Edictos class"""
 
-    def test_get_sentencias(self):
-        """Test get sentencias"""
+    def test_get_edictos(self):
+        """Test get edictos"""
 
         # Consultar
         try:
             response = requests.get(
-                url=f"{config['api_base_url']}/api/v5/sentencias",
+                url=f"{config['api_base_url']}/api/v5/edictos",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -40,17 +40,16 @@ class TestSentencias(unittest.TestCase):
         for item in contenido["data"]:
             self.assertEqual("id" in item, True)
             self.assertEqual("distrito_clave" in item, True)
+            self.assertEqual("distrito_nombre" in item, True)
+            self.assertEqual("distrito_nombre_corto" in item, True)
             self.assertEqual("autoridad_clave" in item, True)
-            self.assertEqual("materia_nombre" in item, True)
-            self.assertEqual("materia_tipo_juicio_descripcion" in item, True)
-            self.assertEqual("sentencia" in item, True)
-            self.assertEqual("sentencia_fecha" in item, True)
-            self.assertEqual("expediente" in item, True)
-            self.assertEqual("expediente_anio" in item, True)
-            self.assertEqual("expediente_num" in item, True)
+            self.assertEqual("autoridad_descripcion" in item, True)
+            self.assertEqual("autoridad_descripcion_corta" in item, True)
             self.assertEqual("fecha" in item, True)
             self.assertEqual("descripcion" in item, True)
-            self.assertEqual("es_perspectiva_genero" in item, True)
+            self.assertEqual("expediente" in item, True)
+            self.assertEqual("numero_publicacion" in item, True)
+            self.assertEqual("es_declaracion_de_ausencia" in item, True)
             self.assertEqual("rag_fue_analizado_tiempo" in item, True)
             self.assertEqual("rag_fue_sintetizado_tiempo" in item, True)
             self.assertEqual("rag_fue_categorizado_tiempo" in item, True)

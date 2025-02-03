@@ -1,5 +1,5 @@
 """
-Unit Tests MateriasTiposJuicios
+Unit Tests Web Ramas
 """
 
 import unittest
@@ -9,16 +9,16 @@ import requests
 from tests import config, oauth2_token
 
 
-class TestMateriasTiposJuicios(unittest.TestCase):
-    """Tests MateriasTiposJuicios class"""
+class TestWebRamas(unittest.TestCase):
+    """Tests WebRamas class"""
 
-    def test_get_materias_tipos_juicios(self):
-        """Test get materias_tipos_juicios"""
+    def test_get_web_ramas(self):
+        """Test get web_ramas"""
 
         # Consultar
         try:
             response = requests.get(
-                url=f"{config['api_base_url']}/api/v5/materias_tipos_juicios",
+                url=f"{config['api_base_url']}/api/v5/web_ramas",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -38,10 +38,8 @@ class TestMateriasTiposJuicios(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
-            self.assertEqual("id" in item, True)
-            self.assertEqual("materia_clave" in item, True)
-            self.assertEqual("materia_nombre" in item, True)
-            self.assertEqual("descripcion" in item, True)
+            self.assertEqual("clave" in item, True)
+            self.assertEqual("nombre" in item, True)
 
 
 if __name__ == "__main__":

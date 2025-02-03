@@ -1,5 +1,5 @@
 """
-Materias
+Web Ramas
 """
 
 from typing import Annotated
@@ -12,42 +12,42 @@ from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
-from ..models.materias import Materia
 from ..models.permisos import Permiso
-from ..schemas.materias import MateriaOut, OneMateriaOut
+from ..models.web_ramas import WebRama
 from ..schemas.usuarios import UsuarioInDB
+from ..schemas.web_ramas import OneWebRamaOut, WebRamaOut
 
-materias = APIRouter(prefix="/api/v5/materias", tags=["materias"])
+web_ramas = APIRouter(prefix="/api/v5/web_ramas", tags=["sitio web"])
 
 
-@materias.get("/{clave}", response_model=OneMateriaOut)
+@web_ramas.get("/{clave}", response_model=OneWebRamaOut)
 async def detalle(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     clave: str,
 ):
-    """Detalle de un materia a partir de su ID"""
-    if current_user.permissions.get("MATERIAS", 0) < Permiso.VER:
+    """Detalle de una rama web a partir de su clave"""
+    if current_user.permissions.get("WEB RAMAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
         clave = safe_clave(clave)
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave de la materia")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave")
     try:
-        materia = database.query(Materia).filter(Materia.clave == clave).one()
+        web_rama = database.query(WebRama).filter_by(clave=clave).one()
     except (MultipleResultsFound, NoResultFound):
-        return OneMateriaOut(success=False, message="No existe esa materia")
-    if materia.estatus != "A":
-        return OneMateriaOut(success=False, message="No es activa esa materia, está eliminada")
-    return OneMateriaOut(success=True, message="Detalle de un materia", data=MateriaOut.model_validate(materia))
+        return OneWebRamaOut(success=False, message="No existe ese rama web")
+    if web_rama.estatus != "A":
+        return OneWebRamaOut(success=False, message="No está habilitado ese rama web")
+    return OneWebRamaOut(success=True, message=f"Detalle de {clave}", data=WebRamaOut.model_validate(web_rama))
 
 
-@materias.get("", response_model=CustomPage[MateriaOut])
+@web_ramas.get("", response_model=CustomPage[WebRamaOut])
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
 ):
-    """Paginado de materias"""
-    if current_user.permissions.get("MATERIAS", 0) < Permiso.VER:
+    """Paginado de web_ramas"""
+    if current_user.permissions.get("WEB RAMAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    return paginate(database.query(Materia).filter_by(estatus="A").order_by(Materia.clave))
+    return paginate(database.query(WebRama).filter_by(estatus="A").order_by(WebRama.clave))

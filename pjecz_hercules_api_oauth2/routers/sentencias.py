@@ -1,29 +1,30 @@
 """
-Sentencias, API v1
+Sentencias
 """
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from typing import Annotated
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.authentications import get_current_user
+from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave
 from ..models.autoridades import Autoridad
 from ..models.permisos import Permiso
 from ..models.sentencias import Sentencia
-from ..schemas.sentencia import OneSentenciaOut, SentenciaCompleteOut, SentenciaOut, SentenciaRAGIn
-from ..schemas.usuario import UsuarioInDB
+from ..schemas.sentencias import OneSentenciaOut, SentenciaOut, SentenciaRAGIn, SentenciaRAGOut
+from ..schemas.usuarios import UsuarioInDB
 
 sentencias = APIRouter(prefix="/api/v5/sentencias", tags=["sentencias"])
 
 
 @sentencias.get("/{sentencia_id}", response_model=OneSentenciaOut)
 async def detalle(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     sentencia_id: int,
 ):
@@ -35,14 +36,12 @@ async def detalle(
         return OneSentenciaOut(success=False, message="No existe esa sentencia")
     if sentencia.estatus != "A":
         return OneSentenciaOut(success=False, message="No es activa esa sentencia, está eliminada")
-    return OneSentenciaOut(
-        success=True, message="Detalle de una sentencia", data=SentenciaCompleteOut.model_validate(sentencia)
-    )
+    return OneSentenciaOut(success=True, message="Detalle de una sentencia", data=SentenciaRAGOut.model_validate(sentencia))
 
 
 @sentencias.get("", response_model=CustomPage[SentenciaOut])
 async def paginado(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     autoridad_clave: str = None,
     creado: date = None,
@@ -76,7 +75,7 @@ async def paginado(
 
 @sentencias.put("/rag", response_model=OneSentenciaOut)
 async def actualizar_rag(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_user)],
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     rag: SentenciaRAGIn,
 ):
@@ -91,22 +90,22 @@ async def actualizar_rag(
     hay_cambios = False
     if rag.analisis is not None and sentencia.rag_analisis != rag.analisis:
         sentencia.rag_analisis = rag.analisis
-        sentencia.rag_fue_analizado_tiempo = datetime.now(tz=timezone.utc)
+        sentencia.rag_fue_analizado_tiempo = datetime.now(tz=pytz.utc)
         hay_cambios = True
     if rag.sintesis is not None and sentencia.rag_sintesis != rag.sintesis:
         sentencia.rag_sintesis = rag.sintesis
-        sentencia.rag_fue_sintetizado_tiempo = datetime.now(tz=timezone.utc)
+        sentencia.rag_fue_sintetizado_tiempo = datetime.now(tz=pytz.utc)
         hay_cambios = True
     if rag.categorias is not None and sentencia.rag_categorias != rag.categorias:
         sentencia.rag_categorias = rag.categorias
-        sentencia.rag_fue_categorizado_tiempo = datetime.now(tz=timezone.utc)
+        sentencia.rag_fue_categorizado_tiempo = datetime.now(tz=pytz.utc)
         hay_cambios = True
     if hay_cambios is False:
         return OneSentenciaOut(
             success=False,
             message="No hay cambios en las columnas RAG de la sentencia",
             errors=[],
-            data=SentenciaCompleteOut.model_validate(sentencia),
+            data=SentenciaRAGOut.model_validate(sentencia),
         )
     database.add(sentencia)
     database.commit()
@@ -114,5 +113,5 @@ async def actualizar_rag(
         success=True,
         message="Se actualizó la sentencia",
         errors=[],
-        data=SentenciaCompleteOut.model_validate(sentencia),
+        data=SentenciaRAGOut.model_validate(sentencia),
     )

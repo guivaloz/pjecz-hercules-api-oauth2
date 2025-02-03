@@ -1,5 +1,5 @@
 """
-Unit Tests MateriasTiposJuicios
+Unit tests for listas de acuerdos
 """
 
 import unittest
@@ -9,16 +9,16 @@ import requests
 from tests import config, oauth2_token
 
 
-class TestMateriasTiposJuicios(unittest.TestCase):
-    """Tests MateriasTiposJuicios class"""
+class TestListasDeAcuerdos(unittest.TestCase):
+    """Tests Listas de Acuerdos class"""
 
-    def test_get_materias_tipos_juicios(self):
-        """Test get materias_tipos_juicios"""
+    def test_get_listas_de_acuerdos(self):
+        """Test get listas de acuerdos"""
 
         # Consultar
         try:
             response = requests.get(
-                url=f"{config['api_base_url']}/api/v5/materias_tipos_juicios",
+                url=f"{config['api_base_url']}/api/v5/listas_de_acuerdos",
                 headers={"Authorization": f"Bearer {oauth2_token}"},
                 timeout=config["timeout"],
             )
@@ -39,9 +39,17 @@ class TestMateriasTiposJuicios(unittest.TestCase):
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
             self.assertEqual("id" in item, True)
-            self.assertEqual("materia_clave" in item, True)
-            self.assertEqual("materia_nombre" in item, True)
+            self.assertEqual("distrito_clave" in item, True)
+            self.assertEqual("distrito_nombre" in item, True)
+            self.assertEqual("distrito_nombre_corto" in item, True)
+            self.assertEqual("autoridad_clave" in item, True)
+            self.assertEqual("autoridad_descripcion" in item, True)
+            self.assertEqual("autoridad_descripcion_corta" in item, True)
+            self.assertEqual("fecha" in item, True)
             self.assertEqual("descripcion" in item, True)
+            self.assertEqual("rag_fue_analizado_tiempo" in item, True)
+            self.assertEqual("rag_fue_sintetizado_tiempo" in item, True)
+            self.assertEqual("rag_fue_categorizado_tiempo" in item, True)
 
 
 if __name__ == "__main__":

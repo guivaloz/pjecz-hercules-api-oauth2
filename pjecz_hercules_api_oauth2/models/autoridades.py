@@ -55,6 +55,8 @@ class Autoridad(Base, UniversalMixin):
     directorio_sentencias: Mapped[str] = mapped_column(String(256))
 
     # Hijos
+    edictos: Mapped[List["Edicto"]] = relationship("Edicto", back_populates="autoridad")
+    listas_de_acuerdos: Mapped[List["ListaDeAcuerdo"]] = relationship("ListaDeAcuerdo", back_populates="autoridad")
     sentencias: Mapped[List["Sentencia"]] = relationship("Sentencia", back_populates="autoridad")
     usuarios: Mapped[List["Usuario"]] = relationship("Usuario", back_populates="autoridad")
 
@@ -64,10 +66,25 @@ class Autoridad(Base, UniversalMixin):
         return self.distrito.clave
 
     @property
+    def distrito_nombre(self):
+        """Nombre del distrito"""
+        return self.distrito.nombre
+
+    @property
     def distrito_nombre_corto(self):
         """Nombre corto del distrito"""
         return self.distrito.nombre_corto
 
+    @property
+    def materia_clave(self):
+        """Clave de la materia"""
+        return self.materia.clave
+
+    @property
+    def materia_nombre(self):
+        """Nombre de la materia"""
+        return self.materia.nombre
+
     def __repr__(self):
         """Representación"""
-        return f"<Autoridad {self.nombre}>"
+        return f"<Autoridad {self.clave}>"

@@ -10,13 +10,13 @@ from ..dependencies.schemas_base import OneBaseOut
 class PermisoOut(BaseModel):
     """Esquema para entregar permisos"""
 
-    id: int | None = None
-    rol_id: int | None = None
-    rol_nombre: str | None = None
-    modulo_id: int | None = None
-    modulo_nombre: str | None = None
-    nombre: str | None = None
-    nivel: int | None = None
+    id: int
+    rol_id: int
+    rol_nombre: str
+    modulo_id: int
+    modulo_nombre: str
+    nombre: str
+    nivel: int
     model_config = ConfigDict(from_attributes=True)
 
 

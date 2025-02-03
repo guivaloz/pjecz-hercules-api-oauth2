@@ -38,6 +38,7 @@ class TestModulos(unittest.TestCase):
         # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
+            self.assertEqual("id" in item, True)
             self.assertEqual("nombre_corto" in item, True)
             self.assertEqual("nombre" in item, True)
             self.assertEqual("icono" in item, True)
