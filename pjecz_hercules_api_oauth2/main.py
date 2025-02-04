@@ -30,8 +30,8 @@ from .settings import Settings, get_settings
 
 # FastAPI
 app = FastAPI(
-    title="Hércules API OAuth2 del Poder Judicial del Estado de Coahuila de Zaragoza",
-    description="Trabajar con la base de datos 'Plataforma Web'. Uso interno solamente.",
+    title="PJECZ API OAuth2 de Plataforma Web",
+    description="Esta API es usada por los sistemas y aplicaciones. No es para cuentas personales.",
     docs_url="/docs",
     redoc_url=None,
 )
