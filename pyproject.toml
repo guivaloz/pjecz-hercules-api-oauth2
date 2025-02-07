@@ -1,7 +1,7 @@
 [project]
 name = "pjecz-hercules-api-oauth2"
 version = "0.1.0"
-description = ""
+description = "PJECZ API OAuth2 de Plataforma Web"
 authors = [
     {name = "Guillermo Valdes",email = "guillermo@movimientolibre.com"}
 ]

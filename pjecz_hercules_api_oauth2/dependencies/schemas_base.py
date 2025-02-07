@@ -14,4 +14,4 @@ class OneBaseOut(BaseModel):
 
     success: bool
     message: str
-    data: list[T] = None
+    data: list[T] | None = None

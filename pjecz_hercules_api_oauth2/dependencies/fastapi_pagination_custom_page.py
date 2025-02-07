@@ -31,11 +31,11 @@ class CustomPage(AbstractPage[T], Generic[T], ABC):
 
     success: bool
     message: str
-    data: Sequence[T] = None
+    data: Sequence[T]
 
-    total: Optional[GreaterEqualZero] = None
-    limit: Optional[GreaterEqualOne] = None
-    offset: Optional[GreaterEqualZero] = None
+    total: Optional[GreaterEqualZero]
+    limit: Optional[GreaterEqualOne]
+    offset: Optional[GreaterEqualZero]
 
     __params_type__ = CustomPageParams
 
