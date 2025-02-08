@@ -40,6 +40,8 @@ class SentenciaOut(BaseModel):
     fecha: date
     descripcion: str
     es_perspectiva_genero: bool
+    archivo: str
+    url: str
     rag_fue_analizado_tiempo: datetime | None = None
     rag_fue_sintetizado_tiempo: datetime | None = None
     rag_fue_categorizado_tiempo: datetime | None = None

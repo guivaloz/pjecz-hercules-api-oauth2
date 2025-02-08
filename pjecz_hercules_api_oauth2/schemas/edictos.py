@@ -32,6 +32,8 @@ class EdictoOut(BaseModel):
     descripcion: str
     expediente: str
     numero_publicacion: str
+    archivo: str
+    url: str
     es_declaracion_de_ausencia: bool = False
     rag_fue_analizado_tiempo: datetime | None = None
     rag_fue_sintetizado_tiempo: datetime | None = None
