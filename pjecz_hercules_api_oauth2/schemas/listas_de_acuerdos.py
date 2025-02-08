@@ -30,6 +30,8 @@ class ListaDeAcuerdoOut(BaseModel):
     autoridad_descripcion_corta: str
     fecha: date
     descripcion: str
+    archivo: str
+    url: str
     rag_fue_analizado_tiempo: datetime | None = None
     rag_fue_sintetizado_tiempo: datetime | None = None
     rag_fue_categorizado_tiempo: datetime | None = None
