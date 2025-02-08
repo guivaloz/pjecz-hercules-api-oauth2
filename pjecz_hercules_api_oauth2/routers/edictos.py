@@ -5,6 +5,7 @@ Edictos
 from datetime import date, datetime
 from typing import Annotated
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 
@@ -15,7 +16,7 @@ from ..dependencies.safe_string import safe_clave
 from ..models.autoridades import Autoridad
 from ..models.edictos import Edicto
 from ..models.permisos import Permiso
-from ..schemas.edictos import EdictoOut, EdictoRAGOut, OneEdictoOut
+from ..schemas.edictos import EdictoOut, EdictoRAGIn, EdictoRAGOut, OneEdictoOut
 from ..schemas.usuarios import UsuarioInDB
 
 edictos = APIRouter(prefix="/api/v5/edictos", tags=["edictos"])
@@ -70,3 +71,47 @@ async def paginado(
                 Edicto.creado <= datetime(creado_hasta.year, creado_hasta.month, creado_hasta.day, 23, 59, 59)
             )
     return paginate(consulta.filter(Edicto.estatus == "A").order_by(Edicto.id.desc()))
+
+
+@edictos.put("/rag", response_model=OneEdictoOut)
+async def actualizar_rag(
+    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
+    database: Annotated[Session, Depends(get_db)],
+    rag: EdictoRAGIn,
+):
+    """Actualizar Retrieval-Augmented Generation (RAG) de un edicto"""
+    if current_user.permissions.get("SENTENCIAS", 0) < Permiso.MODIFICAR:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    sentencia = database.query(Edicto).get(rag.id)
+    if sentencia is None:
+        return OneEdictoOut(success=False, message="No existe esa sentencia")
+    if sentencia.estatus != "A":
+        return OneEdictoOut(success=False, message="No es activa esa sentencia, está eliminada")
+    hay_cambios = False
+    if rag.analisis is not None and sentencia.rag_analisis != rag.analisis:
+        sentencia.rag_analisis = rag.analisis
+        sentencia.rag_fue_analizado_tiempo = datetime.now(tz=pytz.utc)
+        hay_cambios = True
+    if rag.sintesis is not None and sentencia.rag_sintesis != rag.sintesis:
+        sentencia.rag_sintesis = rag.sintesis
+        sentencia.rag_fue_sintetizado_tiempo = datetime.now(tz=pytz.utc)
+        hay_cambios = True
+    if rag.categorias is not None and sentencia.rag_categorias != rag.categorias:
+        sentencia.rag_categorias = rag.categorias
+        sentencia.rag_fue_categorizado_tiempo = datetime.now(tz=pytz.utc)
+        hay_cambios = True
+    if hay_cambios is False:
+        return OneEdictoOut(
+            success=False,
+            message="No hay cambios en las columnas RAG de la sentencia",
+            errors=[],
+            data=EdictoRAGOut.model_validate(sentencia),
+        )
+    database.add(sentencia)
+    database.commit()
+    return OneEdictoOut(
+        success=True,
+        message="Se actualizó la sentencia",
+        errors=[],
+        data=EdictoRAGOut.model_validate(sentencia),
+    )
