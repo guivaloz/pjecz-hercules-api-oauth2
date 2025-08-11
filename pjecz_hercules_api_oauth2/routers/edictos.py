@@ -43,16 +43,16 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    autoridad_clave: str = None,
-    creado: date = None,
-    creado_desde: date = None,
-    creado_hasta: date = None,
+    autoridad_clave: str = "",
+    creado: date | None = None,
+    creado_desde: date | None = None,
+    creado_hasta: date | None = None,
 ):
     """Paginado de edictos"""
     if current_user.permissions.get("EDICTOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     consulta = database.query(Edicto)
-    if autoridad_clave is not None:
+    if autoridad_clave:
         try:
             autoridad_clave = safe_clave(autoridad_clave)
         except ValueError:
@@ -104,7 +104,6 @@ async def actualizar_rag(
         return OneEdictoOut(
             success=False,
             message="No hay cambios en las columnas RAG de la sentencia",
-            errors=[],
             data=EdictoRAGOut.model_validate(sentencia),
         )
     database.add(sentencia)
@@ -112,6 +111,5 @@ async def actualizar_rag(
     return OneEdictoOut(
         success=True,
         message="Se actualizó la sentencia",
-        errors=[],
         data=EdictoRAGOut.model_validate(sentencia),
     )

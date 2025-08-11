@@ -4,8 +4,6 @@ Permisos, esquemas de pydantic
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class PermisoOut(BaseModel):
     """Esquema para entregar permisos"""
@@ -20,7 +18,9 @@ class PermisoOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OnePermisoOut(OneBaseOut):
+class OnePermisoOut(BaseModel):
     """Esquema para entregar un permiso"""
 
+    success: bool
+    message: str
     data: PermisoOut | None = None

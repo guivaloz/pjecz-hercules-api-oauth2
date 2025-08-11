@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ..dependencies.authentications import get_current_active_user
 from ..dependencies.database import Session, get_db
@@ -28,7 +28,7 @@ async def detalle(
     database: Annotated[Session, Depends(get_db)],
     clave: str,
 ):
-    """Detalle de un autoridad a partir de su ID"""
+    """Detalle de un autoridad a partir de su clave"""
     if current_user.permissions.get("AUTORIDADES", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
@@ -48,16 +48,16 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    distrito_clave: str = None,
-    es_jurisdiccional: bool = None,
-    es_notaria: bool = None,
-    materia_clave: str = None,
+    distrito_clave: str = "",
+    es_jurisdiccional: bool | None = None,
+    es_notaria: bool | None = None,
+    materia_clave: str = "",
 ):
     """Paginado de autoridades"""
     if current_user.permissions.get("AUTORIDADES", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     consulta = database.query(Autoridad)
-    if distrito_clave is not None:
+    if distrito_clave:
         try:
             distrito_clave = safe_clave(distrito_clave)
         except ValueError:
@@ -67,7 +67,7 @@ async def paginado(
         consulta = consulta.filter(Autoridad.es_jurisdiccional == es_jurisdiccional)
     if es_notaria is not None:
         consulta = consulta.filter(Autoridad.es_notaria == es_notaria)
-    if materia_clave is not None:
+    if materia_clave:
         try:
             materia_clave = safe_clave(materia_clave)
         except ValueError:

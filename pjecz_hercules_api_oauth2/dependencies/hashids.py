@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import Depends
 from hashids import Hashids
 
-from ..settings import Settings, get_settings
+from ..config.settings import Settings, get_settings
 
 HASHID_REGEXP = re.compile("[0-9a-zA-Z]{8,16}")
 
@@ -18,7 +18,7 @@ def cifrar_id(
     settings: Settings = Depends(get_settings),
 ) -> str:
     """Cifrar ID"""
-    hashids = Hashids(settings.salt, min_length=8)
+    hashids = Hashids(settings.SALT, min_length=8)
     return hashids.encode(un_id)
 
 
@@ -27,7 +27,7 @@ def descifrar_id(
     settings: Settings = Depends(get_settings),
 ) -> Any:
     """Descifrar ID"""
-    hashids = Hashids(settings.salt, min_length=8)
+    hashids = Hashids(settings.SALT, min_length=8)
     if HASHID_REGEXP.match(un_id_hasheado):
         pag_pago_id = hashids.decode(un_id_hasheado)
         if len(pag_pago_id) == 1:

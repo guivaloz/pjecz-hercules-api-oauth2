@@ -4,8 +4,6 @@ Modulos, esquemas de pydantic
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class ModuloOut(BaseModel):
     """Esquema para entregar modulos"""
@@ -19,7 +17,9 @@ class ModuloOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneModuloOut(OneBaseOut):
+class OneModuloOut(BaseModel):
     """Esquema para entregar un modulo"""
 
+    success: bool
+    message: str
     data: ModuloOut | None = None

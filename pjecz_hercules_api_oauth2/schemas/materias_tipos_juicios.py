@@ -4,8 +4,6 @@ Materias Tipos de Juicios, esquemas de pydantic
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class MateriaTipoJuicioOut(BaseModel):
     """Esquema para entregar tipos de juicios"""
@@ -17,7 +15,9 @@ class MateriaTipoJuicioOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneMateriaTipoJuicioOut(OneBaseOut):
+class OneMateriaTipoJuicioOut(BaseModel):
     """Esquema para entregar un tipo de juicio"""
 
+    success: bool
+    message: str
     data: MateriaTipoJuicioOut | None = None
