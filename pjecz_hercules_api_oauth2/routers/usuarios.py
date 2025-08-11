@@ -44,13 +44,13 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    autoridad_clave: str = None,
+    autoridad_clave: str = "",
 ):
     """Paginado de usuarios"""
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     consulta = database.query(Usuario)
-    if autoridad_clave is not None:
+    if autoridad_clave:
         try:
             clave = safe_clave(autoridad_clave)
         except ValueError:

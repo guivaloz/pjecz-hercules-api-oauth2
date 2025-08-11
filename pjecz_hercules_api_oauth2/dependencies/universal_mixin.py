@@ -10,10 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import now
 from sqlalchemy.types import CHAR
 
-from ..settings import get_settings
+from ..config.settings import get_settings
 
 settings = get_settings()
-hashids = Hashids(salt=settings.salt, min_length=8)
+hashids = Hashids(salt=settings.SALT, min_length=8)
 
 
 class UniversalMixin:

@@ -12,9 +12,9 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
+from ..config.settings import Settings, get_settings
 from ..models.usuarios import Usuario
 from ..schemas.usuarios import UsuarioInDB
-from ..settings import Settings, get_settings
 from .database import Session, get_db
 from .exceptions import MyAnyError, MyAuthenticationError, MyIsDeletedError, MyNotExistsError, MyNotValidParamError
 from .safe_string import safe_email
@@ -46,6 +46,12 @@ def get_usuario_with_email(database: Session, usuario_email: str) -> UsuarioInDB
         "apellido_paterno": usuario.apellido_paterno,
         "apellido_materno": usuario.apellido_materno,
         "puesto": usuario.puesto,
+        "autoridad_clave": usuario.autoridad.clave,
+        "autoridad_descripcion": usuario.autoridad.descripcion,
+        "autoridad_descripcion_corta": usuario.autoridad.descripcion_corta,
+        "distrito_clave": usuario.autoridad.distrito.clave,
+        "distrito_nombre": usuario.autoridad.distrito.nombre,
+        "distrito_nombre_corto": usuario.autoridad.distrito.nombre_corto,
         "username": usuario.email,
         "permissions": usuario.permissions,
         "hashed_password": usuario.contrasena,
@@ -80,13 +86,13 @@ def encode_token(settings: Settings, usuario: UsuarioInDB) -> str:
     expiration_dt = datetime.now(timezone.utc) + timedelta(seconds=TOKEN_EXPIRES_SECONDS)
     expires_at = expiration_dt.timestamp()
     payload = {"username": usuario.email, "expires_at": expires_at}
-    return jwt.encode(payload=payload, key=settings.secret_key, algorithm=ALGORITHM)
+    return jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
 def decode_token(token: str, settings: Settings) -> dict:
     """Decodificar el token"""
     try:
-        payload = jwt.decode(jwt=token, key=settings.secret_key, algorithms=[ALGORITHM])
+        payload = jwt.decode(jwt=token, key=settings.SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError as error:
         raise MyAuthenticationError("No es válido el token") from error
     if "expires_at" not in payload or payload["expires_at"] < datetime.now(timezone.utc).timestamp():

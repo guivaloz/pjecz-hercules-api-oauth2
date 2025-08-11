@@ -4,8 +4,6 @@ Roles, esquemas de pydantic
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class RolOut(BaseModel):
     """Esquema para entregar roles"""
@@ -15,7 +13,9 @@ class RolOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneRolOut(OneBaseOut):
+class OneRolOut(BaseModel):
     """Esquema para entregar un rol"""
 
+    success: bool
+    message: str
     data: RolOut | None = None

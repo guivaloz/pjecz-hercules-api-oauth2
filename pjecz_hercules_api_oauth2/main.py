@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_pagination import add_pagination
 
+from .config.settings import Settings, get_settings
 from .dependencies.authentications import TOKEN_EXPIRES_SECONDS, authenticate_user, encode_token
 from .dependencies.database import Session, get_db
 from .dependencies.exceptions import MyAnyError
@@ -23,10 +24,7 @@ from .routers.roles import roles
 from .routers.sentencias import sentencias
 from .routers.usuarios import usuarios
 from .routers.usuarios_roles import usuarios_roles
-from .routers.web_paginas import web_paginas
-from .routers.web_ramas import web_ramas
 from .schemas.usuarios import Token
-from .settings import Settings, get_settings
 
 # FastAPI
 app = FastAPI(
@@ -49,8 +47,6 @@ app.include_router(roles)
 app.include_router(sentencias)
 app.include_router(usuarios)
 app.include_router(usuarios_roles)
-app.include_router(web_paginas)
-app.include_router(web_ramas)
 
 # Paginación
 add_pagination(app)

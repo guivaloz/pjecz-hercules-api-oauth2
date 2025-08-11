@@ -6,8 +6,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class EdictoRAGIn(BaseModel):
     """Esquema para recibir los datos RAG del edicto"""
@@ -49,7 +47,9 @@ class EdictoRAGOut(EdictoOut):
     rag_categorias: dict | None = None
 
 
-class OneEdictoOut(OneBaseOut):
+class OneEdictoOut(BaseModel):
     """Esquema para entregar un edicto"""
 
+    success: bool
+    message: str
     data: EdictoRAGOut | None = None

@@ -4,8 +4,6 @@ Usuarios, esquemas de pydantic
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class Token(BaseModel):
     """Esquema que se entrega al hacer login"""
@@ -19,23 +17,25 @@ class Token(BaseModel):
 class UsuarioOut(BaseModel):
     """Esquema para entregar usuarios"""
 
-    email: str | None = None
-    nombres: str | None = None
-    apellido_paterno: str | None = None
-    apellido_materno: str | None = None
-    autoridad_clave: str | None = None
-    autoridad_descripcion: str | None = None
-    autoridad_descripcion_corta: str | None = None
-    distrito_clave: str | None = None
-    distrito_nombre: str | None = None
-    distrito_nombre_corto: str | None = None
-    puesto: str | None = None
+    email: str
+    nombres: str
+    apellido_paterno: str
+    apellido_materno: str
+    puesto: str
+    autoridad_clave: str
+    autoridad_descripcion: str
+    autoridad_descripcion_corta: str
+    distrito_clave: str
+    distrito_nombre: str
+    distrito_nombre_corto: str
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneUsuarioOut(OneBaseOut):
+class OneUsuarioOut(BaseModel):
     """Esquema para entregar un usuario"""
 
+    success: bool
+    message: str
     data: UsuarioOut | None = None
 
 
