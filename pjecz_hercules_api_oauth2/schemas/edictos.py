@@ -20,12 +20,11 @@ class EdictoOut(BaseModel):
     """Esquema para entregar edictos para paginado"""
 
     id: int
+    creado: datetime
     distrito_clave: str
     distrito_nombre: str
-    distrito_nombre_corto: str
     autoridad_clave: str
     autoridad_descripcion: str
-    autoridad_descripcion_corta: str
     fecha: date
     descripcion: str
     expediente: str

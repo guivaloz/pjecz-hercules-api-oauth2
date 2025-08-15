@@ -20,12 +20,11 @@ class ListaDeAcuerdoOut(BaseModel):
     """Esquema para entregar listas de acuerdos para paginado"""
 
     id: int
+    creado: datetime
     distrito_clave: str
     distrito_nombre: str
-    distrito_nombre_corto: str
     autoridad_clave: str
     autoridad_descripcion: str
-    autoridad_descripcion_corta: str
     fecha: date
     descripcion: str
     archivo: str
