@@ -10,9 +10,7 @@ class AutoridadOut(BaseModel):
 
     clave: str
     descripcion: str
-    descripcion_corta: str
     distrito_clave: str
-    distrito_nombre_corto: str
     materia_clave: str
     materia_nombre: str
     directorio_edictos: str

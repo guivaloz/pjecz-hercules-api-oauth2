@@ -58,6 +58,7 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_SECONDS: int = int(get_secret("ACCESS_TOKEN_EXPIRE_SECONDS", "3600"))
     ALGORITHM: str = get_secret("ALGORITHM", "HS256")
+    CLOUD_STORAGE_DEPOSITO_LISTAS_DE_ACUERDOS: str = get_secret("CLOUD_STORAGE_DEPOSITO_LISTAS_DE_ACUERDOS")
     DB_HOST: str = get_secret("DB_HOST")
     DB_PORT: int = int(get_secret("DB_PORT", "5432"))
     DB_NAME: str = get_secret("DB_NAME")
