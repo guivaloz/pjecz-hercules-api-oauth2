@@ -5,6 +5,7 @@ PJECZ Hércules API OAuth2
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_pagination import add_pagination
 
@@ -32,6 +33,16 @@ app = FastAPI(
     description="Esta API es usada por los sistemas y aplicaciones. No es para cuentas personales.",
     docs_url="/docs",
     redoc_url=None,
+)
+
+# CORSMiddleware
+settings = get_settings()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ORIGINS.split(","),
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT"],
+    allow_headers=["*"],
 )
 
 # Rutas
